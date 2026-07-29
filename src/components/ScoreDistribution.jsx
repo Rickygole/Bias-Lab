@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { histogram } from '../ml/metrics.js'
-import EmptyState from './EmptyState.jsx'
+import Pending from './Pending.jsx'
 
 const BINS = 20
 const WIDTH = 100
@@ -64,10 +64,7 @@ export default function ScoreDistribution({
 
   if (!bars) {
     return (
-      <EmptyState>
-        Two histograms will stand here, one per group, over a threshold line you can drag straight
-        across them.
-      </EmptyState>
+      <Pending>One histogram per group, under a threshold line you can drag across them.</Pending>
     )
   }
 

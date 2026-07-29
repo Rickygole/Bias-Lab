@@ -65,6 +65,10 @@ export default function App() {
     })
   }, [state.dataset])
 
+  useEffect(() => {
+    if (state.status === 'ready') train()
+  }, [state.status, train])
+
   useEffect(() => () => workerRef.current?.terminate(), [])
 
   const derived = useMemo(() => {
@@ -117,13 +121,13 @@ export default function App() {
           auc={auc}
           thresholds={state.thresholds}
           splitMode={state.splitMode}
-          onTrain={train}
           onThreshold={setThreshold}
           onSplitMode={(value) => dispatch({ type: 'setSplitMode', value })}
+          onTour={() => dispatch({ type: 'setTourStep', step: 0 })}
         />
 
         <main className="flex flex-1 flex-col lg:min-h-0">
-          <div className="grid flex-1 grid-cols-1 gap-4 p-6 lg:min-h-0 lg:grid-cols-2 lg:overflow-y-auto">
+          <div className="grid flex-1 auto-rows-min grid-cols-1 content-start gap-4 p-6 lg:min-h-0 lg:grid-cols-2 lg:overflow-y-auto">
             <Panel title="Score distributions" note="drag the line">
               <ScoreDistribution
                 scores={state.scores}

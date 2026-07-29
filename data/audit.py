@@ -169,9 +169,11 @@ def audit_medical_card() -> None:
     g = np.array(data["train"]["g"] + data["test"]["g"])
     ratio = y[g == 0].mean() / y[g == 1].mean()
     check(
-        "flag ratio is in the range Obermeyer reported",
+        "flag ratio is large but not a caricature",
         1.5 < ratio < 3.5,
-        f"{ratio:.2f}x, against roughly 2.6x in the paper",
+        f"{ratio:.2f}x. This is a property of the generator. The paper reported a different "
+        f"quantity, the share of Black patients receiving extra help rising from 17.7 to 46.5 "
+        f"percent once the proxy was corrected, so the two numbers are not comparable.",
     )
 
     X = np.array(data["train"]["X"] + data["test"]["X"])

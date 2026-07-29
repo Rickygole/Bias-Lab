@@ -1,11 +1,11 @@
 import AnimatedNumber from './AnimatedNumber.jsx'
-import EmptyState from './EmptyState.jsx'
+import Pending from './Pending.jsx'
 import { count, percent } from '../lib/format.js'
 
 function DotGrid({ fraction, color }) {
   const filled = Math.round((fraction ?? 0) * 100)
   return (
-    <div className="mt-4 grid max-w-[240px] grid-cols-10 gap-[2px]" aria-hidden="true">
+    <div className="mt-4 grid max-w-[260px] grid-cols-10 gap-[2px]" aria-hidden="true">
       {Array.from({ length: 100 }, (_, i) => (
         <span
           key={i}
@@ -49,10 +49,9 @@ function Side({ cost, name, color, qualifiedLabel }) {
 export default function HumanCost({ costs, groupNames, qualifiedLabel }) {
   if (!costs) {
     return (
-      <EmptyState>
-        One hundred squares per group, filled to the share of qualified people the model turns away.
-        The two grids will not match.
-      </EmptyState>
+      <Pending>
+        One hundred squares per group, filled to the share of qualified people turned away.
+      </Pending>
     )
   }
 

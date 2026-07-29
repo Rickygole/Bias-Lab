@@ -7,6 +7,20 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+LOCK=.deploy.lock
+if ! mkdir "$LOCK" 2>/dev/null; then
+  echo "another deploy is already running, remove $LOCK if that is wrong" >&2
+  exit 1
+fi
+trap 'rm -rf "$LOCK"' EXIT
+
+if [ -n "$(git status --porcelain)" ]; then
+  echo "working tree is dirty. commit or stash first, so the deploy matches a real commit." >&2
+  git status --short >&2
+  exit 1
+fi
+
+npm test
 npm run build
 touch dist/.nojekyll
 

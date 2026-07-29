@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import AnimatedNumber from './AnimatedNumber.jsx'
-import EmptyState from './EmptyState.jsx'
+import Pending from './Pending.jsx'
 import { percent } from '../lib/format.js'
 
 const MAX_GAP = 0.6
@@ -49,24 +49,24 @@ function Row({ definition }) {
 
   return (
     <tr>
-      <td className="py-2 pr-4 align-middle">
-        <div className="leading-tight">{definition.name}</div>
+      <td className="py-2.5 pr-4 align-middle">
+        <div className="leading-tight font-medium">{definition.name}</div>
         <div className="text-[11px] leading-tight text-muted">{definition.question}</div>
       </td>
-      <td className="num w-16 py-2 pl-3 text-right align-middle">
+      <td className="num w-16 py-2.5 pl-3 text-right align-middle text-muted">
         <AnimatedNumber value={definition.values[0]} format={(v) => percent(v, 1)} />
       </td>
-      <td className="num w-16 py-2 pl-3 text-right align-middle">
+      <td className="num w-16 py-2.5 pl-3 text-right align-middle text-muted">
         <AnimatedNumber value={definition.values[1]} format={(v) => percent(v, 1)} />
       </td>
-      <td className="w-24 py-2 pl-4 align-middle">
+      <td className="w-24 py-2.5 pl-4 align-middle">
         <GapBar values={definition.values} interval={interval} />
       </td>
-      <td className="w-20 py-2 pl-2 text-right align-middle">
+      <td className="w-20 py-2.5 pl-2 text-right align-middle">
         <AnimatedNumber
           value={definition.gap}
           format={(v) => percent(v, 1)}
-          className={`num ${uncertain ? 'text-muted' : ''}`}
+          className={`num text-[16px] ${uncertain ? 'text-muted' : 'text-ink'}`}
         />
         {uncertain ? <div className="text-[11px] leading-tight text-muted">not certain</div> : null}
       </td>
@@ -127,10 +127,7 @@ export default function FairnessTable({ result, groupNames }) {
 
   if (!result) {
     return (
-      <EmptyState>
-        Six definitions of fairness, every one of them visible at the same time. They will not agree
-        with each other, and that is the point.
-      </EmptyState>
+      <Pending>Six definitions of fairness, every one of them visible at the same time.</Pending>
     )
   }
 
@@ -145,10 +142,10 @@ export default function FairnessTable({ result, groupNames }) {
             <th className="label pr-4 pb-2 text-left font-normal">Definition</th>
             <th className="label w-16 pb-2 pl-3 text-right font-normal">{groupNames[0]}</th>
             <th className="label w-16 pb-2 pl-3 text-right font-normal">{groupNames[1]}</th>
-            <th className="label w-24 pb-2 pl-4 text-left font-normal">Gap</th>
-            <th className="label w-20 pb-2 pl-2 text-right font-normal">
-              <span className="sr-only">Gap size</span>
+            <th className="label w-24 pb-2 pl-4 text-left font-normal">
+              <span className="sr-only">Gap direction</span>
             </th>
+            <th className="label w-20 pb-2 pl-2 text-right font-normal text-ink">Gap</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-edge">
@@ -170,16 +167,17 @@ export default function FairnessTable({ result, groupNames }) {
         ) : null}
       </table>
 
-      <p className="mt-4 text-[11px] leading-snug text-muted">
-        Calibration is a property of the scores, not of the threshold, so it holds still while you
-        drag. It is the reason the rows above cannot all reach zero at once.
-      </p>
-
-      <p className="mt-2 text-[11px] leading-snug text-muted">
-        The thin line through each bar is a 95 percent interval. Where it crosses the centre the gap
-        is marked not certain, which means this test set is too small to tell it apart from zero. A
-        gap you cannot measure is not the same as a gap that is not there.
-      </p>
+      <div className="mt-4 grid gap-x-6 gap-y-2 text-[11px] leading-snug text-muted lg:grid-cols-2">
+        <p>
+          Calibration is a property of the scores, not the threshold, so it holds still while you
+          drag. It is why the rows above cannot all reach zero at once.
+        </p>
+        <p>
+          The thin line on each bar is a 95 percent interval. Where it crosses the centre the gap is
+          marked not certain: this test set is too small to tell it apart from zero. A gap you cannot
+          measure is not a gap that is not there.
+        </p>
+      </div>
 
       <p className="mt-auto border-t border-edge pt-4 leading-relaxed">
         {sentence ?? 'Move the threshold and watch which gaps trade against each other.'}

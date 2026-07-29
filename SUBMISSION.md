@@ -7,14 +7,12 @@ for filling in the rest of the form.
 
 ## Problem Statement
 
-Students finishing an introductory AI course can recite that AI can be biased. Almost none of them
-have watched it happen.
+A classifier can report 84 percent accuracy, be telling the truth, and approve men for loans at more
+than three times the rate it approves women. Nothing crashes. The accuracy number does not move.
 
-The reason is that a fairness failure does not look like a failure. It does not crash and it does
-not show up in accuracy. A model can report 84 percent accuracy, be telling the truth, and still
-deny qualified women loans at three times the rate it denies qualified men. That gap is invisible in
-every metric a beginner is taught to check. Until a student has seen it open up in front of them,
-they cannot recognise it in their own work.
+That is what makes fairness failures hard to teach. They do not look like failures. Students
+finishing an introductory AI course can recite that AI can be biased, but almost none of them have
+watched it happen, and you cannot recognise in your own work something you have never seen.
 
 ## Solution Overview
 

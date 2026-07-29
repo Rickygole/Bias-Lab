@@ -1,5 +1,5 @@
 import AnimatedNumber from './AnimatedNumber.jsx'
-import EmptyState from './EmptyState.jsx'
+import Pending from './Pending.jsx'
 import { count, percent } from '../lib/format.js'
 
 const CELLS = [
@@ -49,10 +49,7 @@ function Matrix({ matrix, name, color }) {
 export default function ConfusionMatrices({ matrices, groupNames }) {
   if (!matrices) {
     return (
-      <EmptyState>
-        Four outcomes per group, counted on the test set. The two error cells carry a red tint and
-        say plainly what the error was.
-      </EmptyState>
+      <Pending>Four outcomes per group, counted on the test set.</Pending>
     )
   }
 

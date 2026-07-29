@@ -1,6 +1,5 @@
 {
   "name": "bias-lab",
-  "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -27,5 +26,11 @@
     "tailwindcss": "^4.3.3",
     "vite": "^8.1.1",
     "vitest": "^4.1.10"
+  },
+  "license": "MIT",
+  "description": "An interactive lab where students train a classifier in the browser, drag one threshold, and watch who absorbs the error.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rickygole/Bias-Lab.git"
   }
 }

@@ -11,7 +11,7 @@ const modeOptions = [
 
 function LossSparkline({ history, draw }) {
   if (history.length < 2) return <div className="h-10" />
-  const values = history.map((h) => h.loss)
+  const values = history.map((h) => Math.log(Math.max(h.loss, 1e-6)))
   const max = Math.max(...values)
   const min = Math.min(...values)
   const span = max - min || 1
@@ -84,9 +84,9 @@ export default function LeftRail({
   auc,
   thresholds,
   splitMode,
-  onTrain,
   onThreshold,
   onSplitMode,
+  onTour,
 }) {
   const groupNames = dataset?.groupNames ?? ['Group A', 'Group B']
   const positive = dataset?.positiveLabel?.toLowerCase() ?? 'approved'
@@ -118,14 +118,7 @@ export default function LeftRail({
             </div>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={onTrain}
-            disabled={status !== 'ready'}
-            className="w-full rounded-[4px] bg-ink py-2 text-bg transition-colors duration-150 hover:bg-muted disabled:cursor-default disabled:bg-edge disabled:text-muted"
-          >
-            {status === 'ready' ? 'Train the model' : 'Loading dataset'}
-          </button>
+          <div className="label text-muted">Loading dataset</div>
         )}
       </div>
 
@@ -175,6 +168,19 @@ export default function LeftRail({
           </div>
         </div>
       ) : null}
+
+      <div className="mt-auto hidden pt-4 lg:block">
+        <p className="text-[11px] leading-snug text-muted">
+          Six definitions, one threshold. You cannot satisfy them all at once.
+        </p>
+        <button
+          type="button"
+          onClick={onTour}
+          className="mt-3 rounded-[2px] text-[11px] text-ink underline underline-offset-4 transition-colors duration-150 hover:text-muted"
+        >
+          Walk through it in six steps
+        </button>
+      </div>
     </aside>
   )
 }
