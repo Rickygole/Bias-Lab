@@ -53,28 +53,30 @@ function Row({ definition, family, variant, tail }) {
 
   return (
     <tr className={tail ? '' : 'border-b border-hair'}>
-      <td className="py-2.5 pr-4 align-top">
-        <div className="leading-[19px]">
-          {family ? <span className="font-medium text-ink">{family}</span> : null}
-          {variant ? (
-            <span className={family ? 'text-muted' : 'pl-4 text-muted'}>
-              {family ? ', ' : ''}
-              {variant}
-            </span>
-          ) : null}
+      <td className="py-1.5 pr-6 align-baseline">
+        <div className="grid items-baseline gap-x-6 sm:grid-cols-[minmax(0,264px)_minmax(0,1fr)]">
+          <div className="leading-[19px]">
+            {family ? <span className="font-medium text-ink">{family}</span> : null}
+            {variant ? (
+              <span className="text-muted">
+                {family ? ', ' : ''}
+                {variant}
+              </span>
+            ) : null}
+          </div>
+          <div className="note text-dim">{definition.question}</div>
         </div>
-        <div className="note text-dim">{definition.question}</div>
       </td>
-      <td className="n-sm w-[92px] py-2 pl-3 text-right align-baseline text-muted">
+      <td className="n-sm w-[92px] py-1.5 pl-3 text-right align-baseline text-muted">
         <AnimatedNumber value={definition.values[0]} format={(v) => percent(v, 1)} blankWidth={14} />
       </td>
-      <td className="n-sm w-[92px] py-2 pl-3 text-right align-baseline text-muted">
+      <td className="n-sm w-[92px] py-1.5 pl-3 text-right align-baseline text-muted">
         <AnimatedNumber value={definition.values[1]} format={(v) => percent(v, 1)} blankWidth={14} />
       </td>
-      <td className="hidden w-[150px] py-2 pl-5 align-middle sm:table-cell">
+      <td className="hidden w-[150px] py-1.5 pl-5 align-middle sm:table-cell">
         {definition.live ? <GapBar values={definition.values} interval={interval} /> : null}
       </td>
-      <td className="hidden w-[124px] py-2 pl-4 text-right align-baseline whitespace-nowrap sm:table-cell">
+      <td className="hidden w-[124px] py-1.5 pl-4 text-right align-baseline whitespace-nowrap sm:table-cell">
         {interval ? (
           <span className="n-xs text-dim">
             {`± ${points(interval.margin, 1)}`}
@@ -82,7 +84,7 @@ function Row({ definition, family, variant, tail }) {
           </span>
         ) : null}
       </td>
-      <td className="w-[100px] py-2 pl-4 text-right align-baseline">
+      <td className="w-[100px] py-1.5 pl-4 text-right align-baseline">
         <AnimatedNumber
           value={definition.gap}
           format={(v) => percent(v, 1)}
@@ -103,7 +105,7 @@ function rowsFor(definitions) {
 
 function ColumnHead({ name, color }) {
   return (
-    <th scope="col" className="w-[92px] pb-2.5 pl-3 align-bottom font-medium">
+    <th scope="col" className="w-[92px] pb-2 pl-3 align-bottom font-medium">
       <div className="flex min-h-7 flex-col items-end justify-end gap-1">
         <span className="swatch" style={{ background: color }} />
         <span className="label text-right leading-[13px] normal-case tracking-normal">{name}</span>
@@ -188,16 +190,16 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-edge">
-            <th className="label pb-2.5 pr-4 text-left font-medium text-ink">Definition</th>
+            <th className="label pb-2 pr-4 text-left font-medium text-ink">Definition</th>
             <ColumnHead name={groupNames[0]} color="var(--color-groupA)" />
             <ColumnHead name={groupNames[1]} color="var(--color-groupB)" />
-            <th className="label hidden w-[150px] pb-2.5 pl-5 text-left font-medium sm:table-cell">
+            <th className="label hidden w-[150px] pb-2 pl-5 text-left font-medium sm:table-cell">
               <span className="sr-only">Gap direction</span>
             </th>
-            <th className="label hidden w-[124px] pb-2.5 pl-4 text-right font-medium sm:table-cell">
+            <th className="label hidden w-[124px] pb-2 pl-4 text-right font-medium sm:table-cell">
               95% interval
             </th>
-            <th className="label w-[100px] pb-2.5 pl-4 text-right font-medium text-ink">Gap</th>
+            <th className="label w-[100px] pb-2 pl-4 text-right font-medium text-ink">Gap</th>
           </tr>
         </thead>
         <tbody>
@@ -214,11 +216,13 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
         <tbody>
           <tr>
             <td colSpan={6} className="border-t border-edge pt-3 pb-1.5">
-              <div className="label text-dim">Does not move with the threshold</div>
-              <div className="note mt-1 max-w-[68ch] text-dim">
-                The two group columns are each group's own calibration error. The gap is the average
-                difference between the groups in what a score actually turns out to mean, so it is
-                not the difference of the two numbers beside it.
+              <div className="grid items-baseline gap-x-6 sm:grid-cols-[minmax(0,264px)_minmax(0,1fr)]">
+                <div className="label whitespace-nowrap text-dim">Does not move with the threshold</div>
+                <div className="note text-dim">
+                  The group columns are each group's own calibration error. The gap is the average
+                  difference between groups in what a score turns out to mean, not the difference of
+                  those two numbers.
+                </div>
               </div>
             </td>
           </tr>
@@ -244,11 +248,11 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
         </p>
       ) : null}
 
-      <div className="mt-auto flex flex-col gap-2 pt-4 lg:flex-row lg:items-baseline lg:justify-between lg:gap-10">
+      <div className="mt-auto flex flex-col gap-2 pt-3 lg:flex-row lg:items-baseline lg:justify-between lg:gap-10">
         <p className="leading-[21px]">
           {sentence ?? 'Move the threshold and watch which gaps trade against each other.'}
         </p>
-        <p className="note max-w-[46ch] shrink-0 text-dim">
+        <p className="note max-w-[80ch] shrink-0 text-dim">
           Bar direction shows which group is ahead. A gap marked not certain is one this test set is
           too small to measure, not one that is absent.
         </p>

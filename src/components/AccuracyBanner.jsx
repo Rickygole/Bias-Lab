@@ -42,7 +42,7 @@ export default function AccuracyBanner({ accuracy, largestGap, hollow, groupName
   const striking = drift !== null && drift.gap > 0.05 && drift.accuracy < drift.gap / 3
 
   return (
-    <div className="flex flex-wrap items-end gap-x-10 gap-y-4 border-t border-edge px-6 py-4 lg:px-5">
+    <div className="flex flex-wrap items-end gap-x-10 gap-y-4 border-t border-edge px-6 py-3.5 lg:px-5">
       <Stat
         value={accuracy}
         format={(v) => percent(v, 1)}

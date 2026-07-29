@@ -5,7 +5,8 @@ import GroupTag from './GroupTag.jsx'
 const BINS = 22
 const W = 100
 const HALF = 72
-const H = HALF * 2
+const GUTTER = 5
+const H = HALF * 2 + GUTTER
 const DIM = 0.34
 const TICKS = [0, 0.25, 0.5, 0.75, 1]
 
@@ -23,7 +24,7 @@ function Bars({ series, peak, up, lit }) {
       <rect
         key={i}
         x={i * width}
-        y={up ? HALF - h : HALF}
+        y={up ? HALF - h : HALF + GUTTER}
         width={width - 0.4}
         height={h}
         fill={lit}
@@ -116,7 +117,7 @@ export default function ScoreDistribution({
             <clipPath id="lit-b">
               <rect
                 x={(splitMode ? thresholds[1] : thresholds[0]) * W}
-                y={HALF}
+                y={HALF + GUTTER}
                 width={W}
                 height={HALF}
               />
@@ -147,8 +148,8 @@ export default function ScoreDistribution({
           <line
             x1={0}
             x2={W}
-            y1={HALF}
-            y2={HALF}
+            y1={HALF + GUTTER / 2}
+            y2={HALF + GUTTER / 2}
             stroke="var(--color-edge)"
             strokeWidth={1}
             vectorEffect="non-scaling-stroke"
@@ -159,7 +160,7 @@ export default function ScoreDistribution({
               key={line.group}
               x1={line.value * W}
               x2={line.value * W}
-              y1={line.up === false ? HALF : 0}
+              y1={line.up === false ? HALF + GUTTER : 0}
               y2={line.up === true ? HALF : H}
               stroke={line.color}
               strokeWidth={1}
