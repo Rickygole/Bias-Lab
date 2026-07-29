@@ -270,7 +270,6 @@ export function fairness(scores, labels, groups, thresholds) {
         live: false,
         values: [eceA, eceB],
         gap: disparity === null ? null : disparity.weighted,
-        gapLabel: 'largest bin difference',
         detail: disparity,
       },
     ],

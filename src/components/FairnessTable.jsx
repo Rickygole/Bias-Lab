@@ -65,16 +65,16 @@ function Row({ definition, family, variant, tail }) {
         </div>
         <div className="note text-dim">{definition.question}</div>
       </td>
-      <td className="n-sm w-[92px] py-2.5 pl-3 text-right align-baseline text-muted">
+      <td className="n-sm w-[92px] py-2 pl-3 text-right align-baseline text-muted">
         <AnimatedNumber value={definition.values[0]} format={(v) => percent(v, 1)} blankWidth={14} />
       </td>
-      <td className="n-sm w-[92px] py-2.5 pl-3 text-right align-baseline text-muted">
+      <td className="n-sm w-[92px] py-2 pl-3 text-right align-baseline text-muted">
         <AnimatedNumber value={definition.values[1]} format={(v) => percent(v, 1)} blankWidth={14} />
       </td>
-      <td className="hidden w-[150px] py-2.5 pl-5 align-middle sm:table-cell">
-        <GapBar values={definition.values} interval={interval} />
+      <td className="hidden w-[150px] py-2 pl-5 align-middle sm:table-cell">
+        {definition.live ? <GapBar values={definition.values} interval={interval} /> : null}
       </td>
-      <td className="hidden w-[124px] py-2.5 pl-4 text-right align-baseline whitespace-nowrap sm:table-cell">
+      <td className="hidden w-[124px] py-2 pl-4 text-right align-baseline whitespace-nowrap sm:table-cell">
         {interval ? (
           <span className="n-xs text-dim">
             {`± ${points(interval.margin, 1)}`}
@@ -82,7 +82,7 @@ function Row({ definition, family, variant, tail }) {
           </span>
         ) : null}
       </td>
-      <td className="w-[100px] py-2.5 pl-4 text-right align-baseline">
+      <td className="w-[100px] py-2 pl-4 text-right align-baseline">
         <AnimatedNumber
           value={definition.gap}
           format={(v) => percent(v, 1)}
@@ -110,6 +110,22 @@ function ColumnHead({ name, color }) {
       </div>
     </th>
   )
+}
+
+const HOLLOW_GAP = 0.05
+const HOLLOW_SELECTION = 0.15
+
+export function hollowEquality(definitions, ready) {
+  if (!ready) return null
+  const live = definitions.filter((d) => d.live)
+  if (!live.length || live.some((d) => d.gap === null)) return null
+  if (Math.max(...live.map((d) => d.gap)) >= HOLLOW_GAP) return null
+
+  const parity = definitions.find((d) => d.key === 'demographicParity')
+  const [a, b] = parity?.values ?? []
+  if (a === null || b === null || a === undefined || b === undefined) return null
+  if (Math.max(a, b) >= HOLLOW_SELECTION) return null
+  return [a, b]
 }
 
 function useTradeSentence(definitions) {
@@ -165,6 +181,7 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
 
   const moving = rowsFor(definitions.filter((d) => d.live))
   const fixed = rowsFor(definitions.filter((d) => !d.live))
+  const hollow = hollowEquality(definitions, ready)
 
   return (
     <div className="flex flex-1 flex-col">
@@ -196,8 +213,13 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
         </tbody>
         <tbody>
           <tr>
-            <td colSpan={6} className="border-t border-edge pt-3.5 pb-2">
+            <td colSpan={6} className="border-t border-edge pt-3 pb-1.5">
               <div className="label text-dim">Does not move with the threshold</div>
+              <div className="note mt-1 max-w-[68ch] text-dim">
+                The two group columns are each group's own calibration error. The gap is the average
+                difference between the groups in what a score actually turns out to mean, so it is
+                not the difference of the two numbers beside it.
+              </div>
             </td>
           </tr>
           {fixed.map(({ d, family, variant }, i) => (
@@ -211,6 +233,16 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
           ))}
         </tbody>
       </table>
+
+      {hollow ? (
+        <p className="mt-4 border-t border-hair pt-3 leading-[21px] text-ink">
+          Every gap is small here because almost nobody is approved:{' '}
+          <span className="num">{percent(hollow[0], 1)}</span> of {groupNames[0]} and{' '}
+          <span className="num">{percent(hollow[1], 1)}</span> of {groupNames[1]}. Equality bought by
+          turning almost everyone away is the cheapest kind there is. Try it again while approving at
+          least a quarter of each group.
+        </p>
+      ) : null}
 
       <div className="mt-auto flex flex-col gap-2 pt-4 lg:flex-row lg:items-baseline lg:justify-between lg:gap-10">
         <p className="leading-[21px]">
