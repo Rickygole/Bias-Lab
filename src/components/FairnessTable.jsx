@@ -49,20 +49,20 @@ function Row({ definition }) {
 
   return (
     <tr>
-      <td className="py-2.5 pr-4 align-middle">
+      <td className="py-2 pr-4 align-middle">
         <div className="leading-tight font-medium">{definition.name}</div>
         <div className="text-[11px] leading-tight text-muted">{definition.question}</div>
       </td>
-      <td className="num w-16 py-2.5 pl-3 text-right align-middle text-muted">
+      <td className="num w-16 py-2 pl-3 text-right align-middle text-muted">
         <AnimatedNumber value={definition.values[0]} format={(v) => percent(v, 1)} />
       </td>
-      <td className="num w-16 py-2.5 pl-3 text-right align-middle text-muted">
+      <td className="num w-16 py-2 pl-3 text-right align-middle text-muted">
         <AnimatedNumber value={definition.values[1]} format={(v) => percent(v, 1)} />
       </td>
-      <td className="w-24 py-2.5 pl-4 align-middle">
+      <td className="hidden w-24 py-2 pl-4 align-middle sm:table-cell">
         <GapBar values={definition.values} interval={interval} />
       </td>
-      <td className="w-20 py-2.5 pl-2 text-right align-middle">
+      <td className="w-20 py-2 pl-2 text-right align-middle">
         <AnimatedNumber
           value={definition.gap}
           format={(v) => percent(v, 1)}
@@ -142,7 +142,7 @@ export default function FairnessTable({ result, groupNames }) {
             <th className="label pr-4 pb-2 text-left font-normal">Definition</th>
             <th className="label w-16 pb-2 pl-3 text-right font-normal">{groupNames[0]}</th>
             <th className="label w-16 pb-2 pl-3 text-right font-normal">{groupNames[1]}</th>
-            <th className="label w-24 pb-2 pl-4 text-left font-normal">
+            <th className="label hidden w-24 pb-2 pl-4 text-left font-normal sm:table-cell">
               <span className="sr-only">Gap direction</span>
             </th>
             <th className="label w-20 pb-2 pl-2 text-right font-normal text-ink">Gap</th>
@@ -167,19 +167,18 @@ export default function FairnessTable({ result, groupNames }) {
         ) : null}
       </table>
 
-      <div className="mt-4 grid gap-x-6 gap-y-2 text-[11px] leading-snug text-muted lg:grid-cols-2">
+      <div className="mt-3 grid gap-x-6 gap-y-1 text-[11px] leading-snug text-muted lg:grid-cols-2">
         <p>
-          Calibration is a property of the scores, not the threshold, so it holds still while you
-          drag. It is why the rows above cannot all reach zero at once.
+          Calibration holds still while you drag. It is a property of the scores, not the threshold,
+          and it is why the rows above cannot all reach zero at once.
         </p>
         <p>
-          The thin line on each bar is a 95 percent interval. Where it crosses the centre the gap is
-          marked not certain: this test set is too small to tell it apart from zero. A gap you cannot
-          measure is not a gap that is not there.
+          The thin line on each bar is a 95 percent interval. A gap marked not certain is one this
+          test set is too small to measure, not one that is absent.
         </p>
       </div>
 
-      <p className="mt-auto border-t border-edge pt-4 leading-relaxed">
+      <p className="mt-auto border-t border-edge pt-3 leading-relaxed">
         {sentence ?? 'Move the threshold and watch which gaps trade against each other.'}
       </p>
     </div>

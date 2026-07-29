@@ -92,13 +92,16 @@ export default function LeftRail({
   const positive = dataset?.positiveLabel?.toLowerCase() ?? 'approved'
 
   return (
-    <aside className="flex w-full shrink-0 flex-col gap-4 border-edge p-6 lg:w-80 lg:overflow-y-auto lg:border-r">
+    <aside className="scroller flex w-full shrink-0 flex-col gap-4 border-edge p-6 lg:w-80 lg:overflow-y-auto lg:border-r">
       <DatasetCard datasetId={datasetId} dataset={dataset} />
 
       <div className="rounded-md border border-edge bg-panel p-4">
         {status === 'trained' ? (
           <div>
-            <div className="label mb-2 text-ink">Trained</div>
+            <div className="mb-2 flex items-baseline justify-between gap-4">
+              <span className="label text-ink">Trained</span>
+              <span className="text-[11px] text-muted">training loss</span>
+            </div>
             <LossSparkline history={history} draw />
             <div className="mt-4 flex justify-between text-[11px] text-muted">
               <span>
@@ -111,7 +114,10 @@ export default function LeftRail({
           </div>
         ) : status === 'training' ? (
           <div>
-            <div className="label mb-2 text-ink">Training</div>
+            <div className="mb-2 flex items-baseline justify-between gap-4">
+              <span className="label text-ink">Training</span>
+              <span className="text-[11px] text-muted">training loss</span>
+            </div>
             <LossSparkline history={history} />
             <div className="mt-4 text-[11px] text-muted">
               epoch <span className="num text-ink">{epoch}</span>
