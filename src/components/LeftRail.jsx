@@ -92,7 +92,7 @@ export default function LeftRail({
   const positive = dataset?.positiveLabel?.toLowerCase() ?? 'approved'
 
   return (
-    <aside className="flex w-full shrink-0 flex-col gap-4 overflow-y-auto border-edge p-6 lg:w-80 lg:border-r">
+    <aside className="flex w-full shrink-0 flex-col gap-4 border-edge p-6 lg:w-80 lg:overflow-y-auto lg:border-r">
       <DatasetCard datasetId={datasetId} dataset={dataset} />
 
       <div className="rounded-md border border-edge bg-panel p-4">

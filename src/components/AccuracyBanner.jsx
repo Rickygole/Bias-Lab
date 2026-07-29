@@ -25,7 +25,7 @@ export default function AccuracyBanner({ accuracy, largestGap }) {
   const striking = drift !== null && drift.gap > 0.05 && drift.accuracy < drift.gap / 3
 
   return (
-    <div className="flex shrink-0 flex-wrap items-baseline gap-x-6 gap-y-2 border-t border-edge px-6 py-6">
+    <div className="sticky bottom-0 z-10 flex shrink-0 flex-wrap items-baseline gap-x-6 gap-y-2 border-t border-edge bg-bg px-6 py-6 lg:static">
       <AnimatedNumber
         value={accuracy}
         format={(v) => (v === null ? '--.-%' : percent(v, 1))}

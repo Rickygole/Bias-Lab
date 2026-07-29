@@ -98,7 +98,7 @@ export default function App() {
   const groupNames = dataset?.groupNames ?? ['Group A', 'Group B']
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex min-h-dvh flex-col lg:h-dvh">
       <TopBar
         datasetId={state.datasetId}
         onSelect={(id) => dispatch({ type: 'selectDataset', id })}
@@ -106,7 +106,7 @@ export default function App() {
         onTour={() => dispatch({ type: 'setTourStep', step: 0 })}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+      <div className="flex flex-1 flex-col lg:min-h-0 lg:flex-row">
         <LeftRail
           datasetId={state.datasetId}
           dataset={dataset}
@@ -122,8 +122,8 @@ export default function App() {
           onSplitMode={(value) => dispatch({ type: 'setSplitMode', value })}
         />
 
-        <main className="flex min-h-0 flex-1 flex-col">
-          <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-6 lg:grid-cols-2">
+        <main className="flex flex-1 flex-col lg:min-h-0">
+          <div className="grid flex-1 grid-cols-1 gap-4 p-6 lg:min-h-0 lg:grid-cols-2 lg:overflow-y-auto">
             <Panel title="Score distributions" note="drag the line">
               <ScoreDistribution
                 scores={state.scores}

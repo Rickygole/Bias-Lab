@@ -36,10 +36,10 @@ function Row({ definition }) {
         <div className="leading-tight">{definition.name}</div>
         <div className="text-[11px] leading-tight text-muted">{definition.question}</div>
       </td>
-      <td className="num w-16 py-2 text-right align-middle">
+      <td className="num w-16 py-2 pl-3 text-right align-middle">
         <AnimatedNumber value={definition.values[0]} format={(v) => percent(v, 1)} />
       </td>
-      <td className="num w-16 py-2 text-right align-middle">
+      <td className="num w-16 py-2 pl-3 text-right align-middle">
         <AnimatedNumber value={definition.values[1]} format={(v) => percent(v, 1)} />
       </td>
       <td className="w-24 py-2 pl-4 align-middle">
@@ -121,8 +121,8 @@ export default function FairnessTable({ result, groupNames }) {
         <thead>
           <tr className="border-b border-edge">
             <th className="label pr-4 pb-2 text-left font-normal">Definition</th>
-            <th className="label w-16 pb-2 text-right font-normal">{groupNames[0]}</th>
-            <th className="label w-16 pb-2 text-right font-normal">{groupNames[1]}</th>
+            <th className="label w-16 pb-2 pl-3 text-right font-normal">{groupNames[0]}</th>
+            <th className="label w-16 pb-2 pl-3 text-right font-normal">{groupNames[1]}</th>
             <th className="label w-24 pb-2 pl-4 text-left font-normal">Gap</th>
             <th className="label w-14 pb-2 pl-2 text-right font-normal">
               <span className="sr-only">Gap size</span>
