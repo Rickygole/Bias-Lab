@@ -79,13 +79,13 @@ export default function App() {
   const derived = useMemo(() => {
     if (!state.scores || !state.dataset) return null
     const { y, g } = state.dataset.test
-    const result = fairness(state.scores, y, g, state.thresholds)
+    const result = fairness(state.scores, y, g, state.thresholds, outcomeLabels[state.datasetId]?.verbs)
     return {
       ...result,
       costs: humanCost(result.matrices, result.rates),
       accuracy: overallAccuracy(state.scores, y, g, state.thresholds),
     }
-  }, [state.scores, state.dataset, state.thresholds])
+  }, [state.scores, state.dataset, state.thresholds, state.datasetId])
 
   const auc = useMemo(() => {
     if (!state.scores || !state.dataset) return null
@@ -140,7 +140,7 @@ export default function App() {
   const worse = costSpread === null ? 0 : costSpread >= 0 ? 1 : 0
 
   return (
-    <div className="flex min-h-dvh w-full max-w-full min-w-0 flex-col overflow-x-hidden lg:h-dvh">
+    <div className="flex min-h-dvh w-full max-w-full min-w-0 flex-col overflow-x-clip lg:h-dvh">
       <TopBar
         datasetId={state.datasetId}
         onSelect={(id) => dispatch({ type: 'selectDataset', id })}
@@ -211,7 +211,6 @@ export default function App() {
 
             <Panel
               title="What this costs people"
-              note="per hundred"
               footer={
                 costSpread === null
                   ? 'Filled squares are people who qualified and were turned away anyway.'
@@ -229,28 +228,29 @@ export default function App() {
             </Panel>
           </div>
 
-          <div className="sticky bottom-0 z-20 bg-bg lg:static">
-            <Tour
-              step={state.tourStep}
-              accuracy={derived?.accuracy ?? null}
-              onStep={(step) => dispatch({ type: 'setTourStep', step })}
-              onClose={() => dispatch({ type: 'setTourStep', step: null })}
-            />
-            <ThresholdBar
-              thresholds={state.thresholds}
-              splitMode={state.splitMode}
-              groupNames={groupNames}
-              onThreshold={setThreshold}
-              onSplitMode={(value) => dispatch({ type: 'setSplitMode', value })}
-            />
-            <AccuracyBanner
-              accuracy={derived?.accuracy ?? null}
-              largestGap={largestGap}
-              hollow={hollow}
-              groupNames={groupNames}
-            />
-          </div>
         </main>
+      </div>
+
+      <div className="sticky bottom-0 z-20 shrink-0 bg-bg lg:static">
+        <Tour
+          step={state.tourStep}
+          accuracy={derived?.accuracy ?? null}
+          onStep={(step) => dispatch({ type: 'setTourStep', step })}
+          onClose={() => dispatch({ type: 'setTourStep', step: null })}
+        />
+        <ThresholdBar
+          thresholds={state.thresholds}
+          splitMode={state.splitMode}
+          groupNames={groupNames}
+          onThreshold={setThreshold}
+          onSplitMode={(value) => dispatch({ type: 'setSplitMode', value })}
+        />
+        <AccuracyBanner
+          accuracy={derived?.accuracy ?? null}
+          largestGap={largestGap}
+          hollow={hollow}
+          groupNames={groupNames}
+        />
       </div>
     </div>
   )

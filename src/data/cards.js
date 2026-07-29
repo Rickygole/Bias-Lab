@@ -2,14 +2,17 @@ export const outcomes = {
   loan: {
     predicted: ['Approved', 'Denied'],
     actual: ['Would repay', 'Would not repay'],
+    verbs: { picked: 'approved', qualify: 'would repay' },
   },
   admissions: {
     predicted: ['Admitted', 'Rejected'],
     actual: ['Would succeed', 'Would not succeed'],
+    verbs: { picked: 'admitted', qualify: 'would succeed' },
   },
   medical: {
     predicted: ['Flagged', 'Not flagged'],
     actual: ['Actually sick', 'Not sick'],
+    verbs: { picked: 'flagged', qualify: 'are actually sick' },
   },
 }
 
