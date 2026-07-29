@@ -1,7 +1,7 @@
 import { datasetIds } from '../data/index.js'
 
 function clampThreshold(raw) {
-  if (raw === null || raw === undefined || raw === '') return null
+  if (raw === null || raw === undefined || raw.trim() === '') return null
   const value = Number(raw)
   if (!Number.isFinite(value)) return null
   return Math.min(1, Math.max(0, Math.round(value * 100) / 100))
@@ -15,7 +15,7 @@ export function readUrlState(search) {
   if (dataset && datasetIds.includes(dataset)) state.datasetId = dataset
 
   const split = params.get('split') === '1'
-  const a = clampThreshold(params.get('a') ?? params.get('t'))
+  const a = clampThreshold(params.get('a')) ?? clampThreshold(params.get('t'))
   const b = clampThreshold(params.get('b'))
 
   if (split && a !== null && b !== null) {

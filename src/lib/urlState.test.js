@@ -35,6 +35,15 @@ describe('readUrlState', () => {
     expect(readUrlState('?t=0.6349').thresholds).toEqual([0.63, 0.63])
   })
 
+  it('falls back to t when a is present but empty', () => {
+    expect(readUrlState('?t=0.7&a=').thresholds).toEqual([0.7, 0.7])
+  })
+
+  it('ignores whitespace rather than reading it as zero', () => {
+    expect(readUrlState('?t=%20').thresholds).toBeUndefined()
+    expect(readUrlState('?t=+').thresholds).toBeUndefined()
+  })
+
   it('opens the tour when asked', () => {
     expect(readUrlState('?tour=1').tourStep).toBe(0)
     expect(readUrlState('?tour=0').tourStep).toBeUndefined()
