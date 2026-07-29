@@ -173,9 +173,9 @@ export default function App() {
           <div className="scroller grid min-w-0 flex-1 auto-rows-min grid-cols-1 content-start gap-4 px-4 pt-3.5 pb-2.5 sm:px-6 lg:min-h-0 lg:grid-cols-12 lg:overflow-y-auto lg:px-5">
             <Panel
               title="Score distributions"
-              note="square root heights"
+              note="share of each group at or above the score"
               className="lg:order-1 lg:col-span-5"
-              footer="Drag the line. Everything to the right of it is approved."
+              footer="Drag the line. Everything to its right is approved, and it crosses the two curves at different heights."
             >
               <ScoreDistribution
                 scores={state.scores}
