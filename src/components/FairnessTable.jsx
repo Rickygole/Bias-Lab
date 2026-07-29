@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import AnimatedNumber from './AnimatedNumber.jsx'
 import { percent } from '../lib/format.js'
 
-const MAX_GAP = 0.6
+const MAX_GAP = 0.4
 
 function GapBar({ values, interval }) {
   const [a, b] = values
@@ -53,7 +53,7 @@ function Row({ definition, family, variant, tail }) {
 
   return (
     <tr className={tail ? '' : 'border-b border-hair'}>
-      <td className="py-2.5 pr-4 align-top">
+      <td className="py-2 pr-4 align-top">
         {family ? (
           <div className="leading-[18px] font-medium text-ink">{family}</div>
         ) : null}
@@ -61,23 +61,23 @@ function Row({ definition, family, variant, tail }) {
           {variant ?? definition.question}
         </div>
       </td>
-      <td className="n-sm w-[76px] py-2.5 pl-3 text-right align-top text-muted">
+      <td className="n-sm w-[76px] py-2 pl-3 text-right align-top text-muted">
         <AnimatedNumber value={definition.values[0]} format={(v) => percent(v, 1)} blankWidth={14} />
       </td>
-      <td className="n-sm w-[76px] py-2.5 pl-3 text-right align-top text-muted">
+      <td className="n-sm w-[76px] py-2 pl-3 text-right align-top text-muted">
         <AnimatedNumber value={definition.values[1]} format={(v) => percent(v, 1)} blankWidth={14} />
       </td>
-      <td className="hidden w-24 py-2.5 pl-4 align-top sm:table-cell">
+      <td className="hidden w-24 py-2 pl-4 align-top sm:table-cell">
         <GapBar values={definition.values} interval={interval} />
       </td>
-      <td className="w-[74px] py-2.5 pl-3 text-right align-top">
+      <td className="w-[86px] py-2 pl-3 text-right align-top">
         <AnimatedNumber
           value={definition.gap}
           format={(v) => percent(v, 1)}
           blankWidth={22}
           className={`n-md ${uncertain ? 'text-muted' : 'text-ink'}`}
         />
-        {uncertain ? <div className="n-xs text-dim">not certain</div> : null}
+        {uncertain ? <div className="n-xs whitespace-nowrap text-dim">not certain</div> : null}
       </td>
     </tr>
   )
@@ -173,7 +173,7 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
             <th className="label hidden w-24 pb-2.5 pl-4 text-left font-medium sm:table-cell">
               <span className="sr-only">Gap direction</span>
             </th>
-            <th className="label w-[74px] pb-2.5 pl-3 text-right font-medium text-ink">Gap</th>
+            <th className="label w-[86px] pb-2.5 pl-3 text-right font-medium text-ink">Gap</th>
           </tr>
         </thead>
         <tbody>

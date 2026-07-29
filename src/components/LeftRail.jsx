@@ -27,10 +27,11 @@ function Card({ title, note, children, className = '' }) {
 }
 
 function LossCurve({ history, epochs }) {
+  const span = Math.log1p(epochs)
   const series = [{ epoch: 0, loss: CHANCE }, ...history]
   const points = series
     .map((h) => {
-      const x = Math.min(1, h.epoch / epochs) * CURVE_W
+      const x = Math.min(1, Math.log1p(h.epoch) / span) * CURVE_W
       const y = CURVE_H - Math.min(1, Math.max(0, h.loss / CHANCE)) * CURVE_H
       return `${x.toFixed(2)},${y.toFixed(2)}`
     })
@@ -186,7 +187,7 @@ function ModelCard({ status, epoch, epochs, history, accuracy, auc }) {
       <LossCurve history={history} epochs={epochs} />
 
       <div className="mt-2 flex items-baseline justify-between gap-3">
-        <span className="note text-dim">Training loss</span>
+        <span className="note text-dim">Loss, log epochs</span>
         <span className="n-xs text-muted">
           {decimal(CHANCE, 3)}
           <span className="px-1 text-dim">to</span>

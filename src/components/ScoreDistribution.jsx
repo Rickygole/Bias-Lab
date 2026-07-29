@@ -2,11 +2,11 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { histogram } from '../ml/metrics.js'
 import GroupTag from './GroupTag.jsx'
 
-const BINS = 40
+const BINS = 24
 const W = 100
-const HALF = 78
+const HALF = 72
 const H = HALF * 2
-const DIM = 0.24
+const DIM = 0.22
 const TICKS = [0, 0.25, 0.5, 0.75, 1]
 
 function density(counts) {
@@ -24,7 +24,7 @@ function Bars({ series, peak, up, lit }) {
         key={i}
         x={i * width}
         y={up ? HALF - h : HALF}
-        width={width - 0.35}
+        width={width - 0.4}
         height={h}
         fill={lit}
       />
@@ -47,7 +47,7 @@ export default function ScoreDistribution({
     if (!scores || !groups) return null
     const a = density(histogram(scores, groups, 0, BINS))
     const b = density(histogram(scores, groups, 1, BINS))
-    return { a, b, peak: Math.max(...a, ...b, 1e-9) }
+    return { a, b, peakA: Math.max(...a, 1e-9), peakB: Math.max(...b, 1e-9) }
   }, [scores, groups])
 
   const positionFromEvent = useCallback((event) => {
@@ -102,7 +102,7 @@ export default function ScoreDistribution({
         <GroupTag name={`${groupNames[1]} below`} color="var(--color-groupB)" />
       </div>
 
-      <div ref={boxRef} className="relative h-[168px] touch-none select-none">
+      <div ref={boxRef} className="relative h-[152px] touch-none select-none">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
@@ -127,18 +127,18 @@ export default function ScoreDistribution({
             <>
               <g className="rise-up" style={{ '--rise-origin': '100%' }}>
                 <g opacity={DIM}>
-                  <Bars series={bars.a} peak={bars.peak} up lit="var(--color-groupA)" />
+                  <Bars series={bars.a} peak={bars.peakA} up lit="var(--color-groupA)" />
                 </g>
                 <g clipPath="url(#lit-a)">
-                  <Bars series={bars.a} peak={bars.peak} up lit="var(--color-groupA)" />
+                  <Bars series={bars.a} peak={bars.peakA} up lit="var(--color-groupA)" />
                 </g>
               </g>
               <g className="rise-up" style={{ '--rise-origin': '0%' }}>
                 <g opacity={DIM}>
-                  <Bars series={bars.b} peak={bars.peak} up={false} lit="var(--color-groupB)" />
+                  <Bars series={bars.b} peak={bars.peakB} up={false} lit="var(--color-groupB)" />
                 </g>
                 <g clipPath="url(#lit-b)">
-                  <Bars series={bars.b} peak={bars.peak} up={false} lit="var(--color-groupB)" />
+                  <Bars series={bars.b} peak={bars.peakB} up={false} lit="var(--color-groupB)" />
                 </g>
               </g>
             </>

@@ -8,9 +8,9 @@ function Cell({ value, share, harm }) {
         <AnimatedNumber value={value} format={count} className="n-md text-ink" blankWidth={16} />
         <span className="n-xs w-7 text-right text-dim">{percent(share, 0)}</span>
       </div>
-      <div className="mt-1.5 h-px w-full bg-hair">
+      <div className="mt-2 h-[3px] w-full bg-hair">
         <div
-          className="h-px transition-[width] duration-200 ease-out"
+          className="h-[3px] transition-[width] duration-200 ease-out"
           style={{
             width: `${Math.min(1, share ?? 0) * 100}%`,
             background: harm ? 'var(--color-bad)' : 'var(--color-dim)',
