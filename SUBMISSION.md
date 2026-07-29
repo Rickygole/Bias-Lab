@@ -62,13 +62,25 @@ actually produces, and fails if they diverge.
 
 ## Technologies Used
 
-React, Vite, Tailwind, Web Workers, and a custom gradient descent implementation. Python with numpy,
-pandas and scikit-learn for offline dataset generation and for the parity check, run through uv.
-Vitest for 76 unit tests, including a server side render smoke test. Deployed on GitHub Pages.
+React, Vite, Tailwind and Web Workers on the front end. A logistic regression implemented from
+scratch: sigmoid, binary cross entropy, full batch gradient descent, about sixty lines, no machine
+learning library. Python with numpy, pandas and scikit-learn offline, run through uv, for dataset
+generation and for the correctness checks. Vitest for 78 unit tests including a server side render
+smoke test. Deployed on GitHub Pages.
+
+Three things in the repository verify the work rather than assert it, and each runs in one command:
+
+- `npm run parity` fits scikit-learn on the identical committed split with regularisation genuinely
+  disabled and asserts agreement with the hand written model. Worst case across three datasets:
+  6.8e-07 on predicted scores, zero difference in AUC, 2.6e-06 on coefficients.
+- `uv run data/audit.py` checks every claim each dataset card makes against what the generator
+  actually produces, and fails the build if a card describes bias the data does not contain.
+- `npm test` includes a test that searches the entire threshold grid and proves the impossibility
+  result holds on the shipped data, plus its converse: the gaps do close when base rates are equal.
 
 No backend, no API, no external inference, no accounts, no API key. Everything runs client side,
-including the model training, so there is nothing that can be down when you open the link. Fonts are
-self hosted. First load is about 180 KB.
+including the model training, so there is nothing that can be down when a judge opens the link.
+Fonts are self hosted. First load is about 187 KB gzipped. It works offline after first load.
 
 There is no large language model in this project, and that is a decision rather than a gap. An LLM
 would explain fairness to the student. This tool makes the student produce the evidence: train a
@@ -83,8 +95,30 @@ Students finishing an introductory AI curriculum, and the instructors teaching t
 
 It was built for the ML Empowerment Build Challenge and it slots directly into the ethics module of
 the challenge's own curriculum. It runs from one link, needs no setup and no accounts, and takes
-about ten minutes. It has not been classroom tested. WORKSHEET.md in the repository is a fifteen question worksheet
-with an answer key for anyone who wants to try it.
+about ten minutes. It has not been classroom tested yet. WORKSHEET.md in the repository is a
+sixteen question worksheet with an answer key for anyone who wants to run it.
+
+## Social Impact Statement
+
+The beneficiary is specific and reachable: the 700 or so students in this challenge, and every
+future cohort that goes through the ML Empowerment Foundation curriculum.
+
+That curriculum teaches, correctly, that AI can be biased. Every intro curriculum does. What almost
+none of them can do is show it, because showing it requires a working model, real data with a real
+base rate difference, and a control the student can move. This tool supplies all three from a single
+link, with no install, no account, no API key and no cost, which matters for exactly the students an
+accessibility focused programme is trying to reach. A student on a school Chromebook gets the same
+experience as one on a workstation, because the model trains on their own machine in a quarter of a
+second.
+
+The larger claim is smaller than it sounds, and that is deliberate. This tool will not make any
+deployed system fairer. What it can do is change what a student notices. A beginner who has watched
+84 percent accuracy hold steady while one group's denial rate climbs will, for the rest of their
+career, ask a second question after seeing an accuracy number. That is a small change repeated
+across a cohort, and it is the honest size of the impact.
+
+The material is free, MIT licensed, and ready to embed. The Foundation is welcome to use it in the
+ethics module as it stands.
 
 ---
 
@@ -103,13 +137,18 @@ with an answer key for anyone who wants to try it.
 **Screenshots:** already captured and committed under `docs/screenshots`. See the list at the
 bottom of this file for the upload order.
 
-**Prize tracks, in order of realistic odds:** Data Driven Insights (this is literally what the
-project is, and the field will be thin). Best Use of Machine Learning (the from scratch plus parity
-check story is unusually verifiable). AI for Education. Best Overall is genuinely in play.
+**Prizes.** The official rules list four, not the twelve on the overview page. Aim accordingly.
 
-Do not chase Most Impactful, which at social good hackathons goes to projects with a nameable
-beneficiary, or Most Innovative, where the Google PAIR prior art is a liability rather than an
-asset. The prior work is acknowledged in the README along with the specific deltas.
+1. **Best Overall.** Judged on creativity, technical skill and real world impact together. This is
+   the main target. The technical case is the strongest part of the submission and it is verifiable
+   in one command.
+2. **Best Beginner.** Do not enter this framing. It is for participants new to AI or programming.
+   Claiming it would be false and a judge comparing it against the parity check would see that.
+3. **Most Innovative.** Weaker ground. Google PAIR shipped a threshold explorable in 2016 and the
+   README says so. Lead with the deltas that are real: six definitions at once, confidence
+   intervals on fairness metrics, a model the student trains, and the named warning when equality
+   is bought by approving nobody. Do not use the word novel.
+4. **Most Impactful.** Worth entering, with the specific angle below rather than a general appeal.
 
 **Screenshot warning:** shots 2 and 3 render a racial health disparity as large numbers. Frame them
 so the left rail is in the picture, because that is where the synthetic data marker lives. A cropped
