@@ -127,7 +127,7 @@ export default function App() {
         />
 
         <main className="flex flex-1 flex-col lg:min-h-0">
-          <div className="grid flex-1 auto-rows-min grid-cols-1 content-start gap-4 p-6 lg:min-h-0 lg:grid-cols-2 lg:overflow-y-auto">
+          <div className="scroller grid flex-1 auto-rows-min grid-cols-1 content-start gap-4 px-6 py-4 lg:min-h-0 lg:grid-cols-2 lg:overflow-y-auto">
             <Panel title="Score distributions" note="drag the line">
               <ScoreDistribution
                 scores={state.scores}
