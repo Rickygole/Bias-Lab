@@ -1,85 +1,71 @@
 import AnimatedNumber from './AnimatedNumber.jsx'
-import Pending from './Pending.jsx'
-import { count, percent, points } from '../lib/format.js'
+import { count, percent } from '../lib/format.js'
 
-function DotGrid({ fraction, color }) {
-  const filled = Math.round((fraction ?? 0) * 100)
+const COLUMNS = 25
+const ROWS = 4
+
+function UnitChart({ fraction, color }) {
+  const filled = fraction === null || fraction === undefined ? -1 : Math.round(fraction * 100)
   return (
-    <div className="mt-4 grid max-w-[260px] grid-cols-10 gap-[2px]" aria-hidden="true">
-      {Array.from({ length: 100 }, (_, i) => (
+    <div
+      className="mt-2.5 grid gap-[2px]"
+      style={{ gridTemplateColumns: `repeat(${COLUMNS}, minmax(0, 1fr))` }}
+      aria-hidden="true"
+    >
+      {Array.from({ length: COLUMNS * ROWS }, (_, i) => (
         <span
           key={i}
-          className="aspect-square rounded-[1px] transition-colors duration-200"
-          style={{ background: i < filled ? color : 'var(--color-edge)' }}
+          className="aspect-square rounded-[1px] transition-colors duration-150 ease-out"
+          style={{ background: i < filled ? color : 'var(--color-hair)' }}
         />
       ))}
     </div>
   )
 }
 
-function Side({ cost, name, color, qualifiedLabel }) {
+function Row({ cost, name, color, qualifiedLabel }) {
   return (
-    <div className="min-w-0 flex-1">
-      <div className="mb-4 flex items-center gap-2">
-        <span className="h-2 w-2 rounded-[1px]" style={{ background: color }} />
-        <span className="text-[11px] text-muted">{name}</span>
-      </div>
-
-      <div className="flex items-baseline gap-2">
-        <AnimatedNumber
-          value={cost.deniedButQualified}
-          format={count}
-          className="num text-[20px] leading-none"
-        />
-        <span className="num text-muted">
-          of <AnimatedNumber value={cost.qualified} format={count} />
+    <div>
+      <div className="flex items-baseline justify-between gap-4">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="swatch" style={{ background: color }} />
+          <span className="note truncate text-ink">{name}</span>
         </span>
+        <AnimatedNumber
+          value={cost?.missRate ?? null}
+          format={(v) => percent(v, 1)}
+          className="n-md text-ink"
+          blankWidth={22}
+        />
       </div>
 
-      <p className="mt-2 leading-snug text-muted">
-        people who {qualifiedLabel} were denied. That is{' '}
-        <span className="num text-ink">{percent(cost.missRate, 1)}</span> of them.
-      </p>
+      <UnitChart fraction={cost?.missRate ?? null} color={color} />
 
-      <DotGrid fraction={cost.missRate} color={color} />
+      <p className="note mt-2 text-muted">
+        <AnimatedNumber value={cost?.deniedButQualified ?? null} format={count} className="num text-ink" blankWidth={14} />
+        {' of '}
+        <AnimatedNumber value={cost?.qualified ?? null} format={count} className="num text-ink" blankWidth={14} />
+        {` people who ${qualifiedLabel} were turned away.`}
+      </p>
     </div>
   )
 }
 
 export default function HumanCost({ costs, groupNames, qualifiedLabel }) {
-  if (!costs) {
-    return (
-      <Pending>
-        One hundred squares per group, filled to the share of qualified people turned away.
-      </Pending>
-    )
-  }
-
-  const spread = costs[1].missRate - costs[0].missRate
-  const worse = spread >= 0 ? 1 : 0
-
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex gap-6">
-        <Side
-          cost={costs[0]}
-          name={groupNames[0]}
-          color="var(--color-groupA)"
-          qualifiedLabel={qualifiedLabel}
-        />
-        <Side
-          cost={costs[1]}
-          name={groupNames[1]}
-          color="var(--color-groupB)"
-          qualifiedLabel={qualifiedLabel}
-        />
-      </div>
-
-      <p className="mt-auto border-t border-edge pt-3 leading-relaxed">
-        {Math.abs(spread) < 0.005
-          ? 'Both groups are turned away at about the same rate right now.'
-          : `${groupNames[worse]} are denied ${points(Math.abs(spread), 1)} points more often than ${groupNames[1 - worse]}.`}
-      </p>
+    <div className="flex flex-col gap-5">
+      <Row
+        cost={costs?.[0] ?? null}
+        name={groupNames[0]}
+        color="var(--color-groupA)"
+        qualifiedLabel={qualifiedLabel}
+      />
+      <Row
+        cost={costs?.[1] ?? null}
+        name={groupNames[1]}
+        color="var(--color-groupB)"
+        qualifiedLabel={qualifiedLabel}
+      />
     </div>
   )
 }
