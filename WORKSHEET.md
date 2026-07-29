@@ -44,25 +44,28 @@ Use the **Loan approval** dataset.
 
 9. Switch to **Separate thresholds**. You can now set a different bar for each group.
 
-10. Try to get **all** of the live gaps under 5 percent at the same time. Record the closest you
-    managed and which definition refused to cooperate.
+10. Try to get **all** of the live gaps under 5 percent at the same time. Write down the two
+    thresholds you used, and then write down what share of each group you ended up approving.
 
-11. Read the note under the fairness table about calibration. Why does calibration not move when you
+11. Now try it again with one extra rule: you must approve at least a quarter of each group. Record
+    the closest you got and which definition refused to cooperate.
+
+12. Read the note under the fairness table about calibration. Why does calibration not move when you
     drag the slider? What does that tell you about the difference between a score and a decision?
 
 ## Part 4. Uncertainty
 
-12. Find a gap marked **not certain**. What does that label mean? Is the gap zero?
+13. Find a gap marked **not certain**. What does that label mean? Is the gap zero?
 
-13. Switch to the **Medical risk** dataset. Look at the group sizes in the confusion matrices. Why
-    are more of the gaps uncertain here than on the loan dataset?
+14. Look at the group sizes in the outcomes panel on any dataset. One group is much smaller than the
+    other. What does that do to the intervals on that group's rates, and why?
 
 ## Part 5. The label
 
-14. Open the dataset card for **Medical risk** and read it. The label is defined by healthcare
+15. Open the dataset card for **Medical risk** and read it. The label is defined by healthcare
     spending. What is wrong with using spending as a measure of who is sick?
 
-15. Suppose you fixed the threshold perfectly, so that every fairness gap on screen was zero. Would
+16. Suppose you fixed the threshold perfectly, so that every fairness gap on screen was zero. Would
     the tool now be fair to the patients in that data? Explain your answer in two sentences.
 
 ---
@@ -73,7 +76,7 @@ Use the **Loan approval** dataset.
   in others. Which contexts, and why do you think the law lands differently in each?
 - Who should decide which definition of fairness a deployed system optimises for? The engineer, the
   company, the regulator, or the people affected?
-- Question 15 is the one that matters. A model can pass every metric on this page and still be built
+- Question 16 is the one that matters. A model can pass every metric on this page and still be built
   on a label that encodes who had access rather than who was sick. What would you need in order to
   detect that, and would any amount of threshold tuning get you there?
 
@@ -93,26 +96,35 @@ denied goes from roughly 102 men and 21 women to roughly 167 men and 33 women.
 same range. They move in opposite directions, so closing one opens the other. Students should find
 they cannot zero both.
 
-10. They will not manage it. The best achievable worst gap on this dataset, searched over every
-threshold pair under a realistic selection floor, is about 8.5 percent. `data/audit.py` in the
-repository computes this.
+10. They will manage it, and that is the point of the question. On Medical risk, separate thresholds
+at 0.72 and 0.67 put every live gap under 5 percent. Look at what it cost: 10.0 percent of White
+patients and 5.2 percent of Black patients were flagged, so almost everyone who needed care was
+turned away. The app says so directly when you get there. Equality achieved by giving nobody
+anything is the cheapest kind, and it is the most common way a real system passes a fairness audit
+while helping no one.
 
-11. Calibration is a property of the scores the model produces, and the threshold only decides where
+11. Now they will not manage it. Once each group must receive at least a quarter of the decisions,
+the best achievable worst gap is roughly 8 to 10 points depending on the dataset. `data/audit.py`
+computes this over the whole threshold grid under a stated 10 percent floor.
+
+12. Calibration is a property of the scores the model produces, and the threshold only decides where
 to cut those scores. Changing where you cut does not change what a score of 0.7 means. A score is a
 statement about probability. A decision is a policy applied to that statement, and only the policy
 is yours to move.
 
-12. It means the confidence interval on the gap crosses zero, so this test set is too small to
+13. It means the confidence interval on the gap crosses zero, so this test set is too small to
 distinguish that gap from no gap. It does not mean the gap is zero. It means you do not know.
 
-13. The disadvantaged group has far fewer positive cases in the test set, so every rate computed on
-that group is estimated from fewer people and the interval around it is wider.
+14. Every rate for the smaller group is estimated from fewer people, so its interval is wider and its
+gaps are more often marked not certain. On the loan data the smaller group has 436 people and only
+47 of them would repay, so the true positive rate rests on 47 cases and one person crossing the line
+moves it by more than two points.
 
-14. Spending measures who received care, which depends on access, insurance, distance to a hospital,
+15. Spending measures who received care, which depends on access, insurance, distance to a hospital,
 time off work and whether a doctor believed the patient. Two equally sick people generate different
 bills. The label therefore records who was treated rather than who was ill.
 
-15. No. Every metric on the page compares the model's decisions to the recorded label, so if the
+16. No. Every metric on the page compares the model's decisions to the recorded label, so if the
 label is wrong the metrics measure agreement with a biased record rather than agreement with
 reality. No threshold can repair a label. Fixing that requires changing what you measure, which is
 what Obermeyer et al. did when they switched the target from cost to a direct measure of illness.
