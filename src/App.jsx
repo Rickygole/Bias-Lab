@@ -10,6 +10,7 @@ import ConfusionMatrices from './components/ConfusionMatrices.jsx'
 import FairnessTable from './components/FairnessTable.jsx'
 import HumanCost from './components/HumanCost.jsx'
 import AccuracyBanner from './components/AccuracyBanner.jsx'
+import Tour from './components/Tour.jsx'
 
 const EPOCHS = 4000
 const LR = 1.5
@@ -154,6 +155,12 @@ export default function App() {
           <AccuracyBanner accuracy={derived?.accuracy ?? null} largestGap={largestGap} />
         </main>
       </div>
+
+      <Tour
+        step={state.tourStep}
+        onStep={(step) => dispatch({ type: 'setTourStep', step })}
+        onClose={() => dispatch({ type: 'setTourStep', step: null })}
+      />
     </div>
   )
 }
