@@ -148,7 +148,7 @@ export default function App() {
         onTour={() => dispatch({ type: 'setTourStep', step: 0 })}
       />
 
-      <div className="flex flex-1 flex-col lg:min-h-0 lg:flex-row">
+      <div className="flex w-full min-w-0 flex-1 flex-col lg:min-h-0 lg:flex-row">
         <LeftRail
           datasetId={state.datasetId}
           dataset={dataset}
@@ -166,7 +166,7 @@ export default function App() {
           onTour={() => dispatch({ type: 'setTourStep', step: 0 })}
         />
 
-        <main className="flex flex-1 flex-col lg:min-h-0">
+        <main className="flex w-full min-w-0 flex-1 flex-col lg:min-h-0">
           <div className="scroller grid min-w-0 flex-1 auto-rows-min grid-cols-1 content-start gap-4 px-4 pt-3.5 pb-2.5 sm:px-6 lg:min-h-0 lg:grid-cols-12 lg:overflow-y-auto lg:px-5">
             <Panel
               title="Score distributions"

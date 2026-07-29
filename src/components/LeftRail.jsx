@@ -224,7 +224,7 @@ export default function LeftRail({
   const qualifiedLabel = dataset?.qualifiedLabel ?? 'qualify'
 
   return (
-    <aside className="scroller order-last flex w-full shrink-0 flex-col gap-3 border-edge px-6 py-4 lg:order-none lg:w-[340px] lg:overflow-y-auto lg:border-r lg:px-5">
+    <aside className="scroller order-last flex w-full min-w-0 max-w-full shrink-0 flex-col gap-3 border-edge px-4 py-4 sm:px-6 lg:order-none lg:w-[340px] lg:overflow-y-auto lg:border-r lg:px-5">
       <DatasetCard datasetId={datasetId} dataset={dataset} />
 
       <CompositionCard
