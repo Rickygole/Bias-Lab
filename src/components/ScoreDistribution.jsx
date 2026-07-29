@@ -1,36 +1,55 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { histogram } from '../ml/metrics.js'
+import { percent } from '../lib/format.js'
 import GroupTag from './GroupTag.jsx'
 
-const BINS = 22
+const GRID = 100
 const W = 100
-const HALF = 72
-const GUTTER = 11
-const H = HALF * 2 + GUTTER
-const DIM = 0.34
+const H = 100
+const FILL = 0.9
+const SCRIM = 0.72
+const EDGE_DIM = 0.42
+const GUIDES = [0.25, 0.5, 0.75]
 const TICKS = [0, 0.25, 0.5, 0.75, 1]
 
-function density(counts) {
-  const total = counts.reduce((sum, c) => sum + c, 0)
-  return total === 0 ? counts.map(() => 0) : counts.map((c) => c / total)
+function shareAtOrAbove(scores, groups, group) {
+  const reach = new Array(GRID + 1).fill(0)
+  let total = 0
+  for (let i = 0; i < scores.length; i++) {
+    if (groups[i] !== group) continue
+    const value = scores[i]
+    if (!Number.isFinite(value)) continue
+    total++
+    reach[Math.min(GRID, Math.max(0, Math.floor(value * GRID)))]++
+  }
+
+  const share = new Array(GRID + 1).fill(0)
+  let running = 0
+  for (let k = GRID; k >= 0; k--) {
+    running += reach[k]
+    share[k] = total === 0 ? 0 : running / total
+  }
+  return share
 }
 
-function Bars({ series, peak, up, lit }) {
-  const width = W / BINS
-  return series.map((value, i) => {
-    const h = peak === 0 ? 0 : Math.sqrt(value / peak) * HALF
-    if (h <= 0) return null
-    return (
-      <rect
-        key={i}
-        x={i * width}
-        y={up ? HALF - h : HALF + GUTTER}
-        width={width - 0.4}
-        height={h}
-        fill={lit}
-      />
-    )
-  })
+function points(share) {
+  return share.map((value, k) => [(k / GRID) * W, (1 - value) * H])
+}
+
+function line(pts) {
+  return pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join(' ')
+}
+
+function area(pts) {
+  return `M0 ${H} ${pts.map((p) => `L${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join(' ')} L${W} ${H} Z`
+}
+
+function band(outer, inner) {
+  const back = inner
+    .slice()
+    .reverse()
+    .map((p) => `L${p[0].toFixed(2)} ${p[1].toFixed(2)}`)
+    .join(' ')
+  return `${line(outer)} ${back} Z`
 }
 
 export default function ScoreDistribution({
@@ -44,12 +63,27 @@ export default function ScoreDistribution({
   const boxRef = useRef(null)
   const dragging = useRef(null)
 
-  const bars = useMemo(() => {
+  const curves = useMemo(() => {
     if (!scores || !groups) return null
-    const a = density(histogram(scores, groups, 0, BINS))
-    const b = density(histogram(scores, groups, 1, BINS))
-    return { a, b, peakA: Math.max(...a, 1e-9), peakB: Math.max(...b, 1e-9) }
+    const a = shareAtOrAbove(scores, groups, 0)
+    const b = shareAtOrAbove(scores, groups, 1)
+    const pa = points(a)
+    const pb = points(b)
+    return {
+      a,
+      b,
+      areaA: area(pa),
+      areaB: area(pb),
+      lineA: line(pa),
+      lineB: line(pb),
+      gap: band(pa, pb),
+    }
   }, [scores, groups])
+
+  const cut = [thresholds[0], splitMode ? thresholds[1] : thresholds[0]]
+  const value = curves
+    ? [curves.a[Math.round(cut[0] * GRID)], curves.b[Math.round(cut[1] * GRID)]]
+    : [null, null]
 
   const positionFromEvent = useCallback((event) => {
     const box = boxRef.current
@@ -62,8 +96,8 @@ export default function ScoreDistribution({
   const handleMove = useCallback(
     (event) => {
       if (dragging.current === null) return
-      const value = positionFromEvent(event)
-      if (value !== null) onThreshold(dragging.current, Math.round(value * 100) / 100)
+      const next = positionFromEvent(event)
+      if (next !== null) onThreshold(dragging.current, Math.round(next * 100) / 100)
     },
     [onThreshold, positionFromEvent],
   )
@@ -85,22 +119,32 @@ export default function ScoreDistribution({
   const startDrag = (group) => (event) => {
     event.preventDefault()
     dragging.current = group
-    const value = positionFromEvent(event)
-    if (value !== null) onThreshold(group, Math.round(value * 100) / 100)
+    const next = positionFromEvent(event)
+    if (next !== null) onThreshold(group, Math.round(next * 100) / 100)
   }
 
   const lines = splitMode
     ? [
-        { group: 0, value: thresholds[0], color: 'var(--color-groupA)', up: true },
-        { group: 1, value: thresholds[1], color: 'var(--color-groupB)', up: false },
+        { group: 0, value: cut[0], color: 'var(--color-groupA)' },
+        { group: 1, value: cut[1], color: 'var(--color-groupB)' },
       ]
-    : [{ group: 0, value: thresholds[0], color: 'var(--color-ink)', up: null }]
+    : [{ group: 0, value: cut[0], color: 'var(--color-ink)' }]
+
+  const lower = Math.min(cut[0], cut[1])
+  const upper = Math.max(cut[0], cut[1])
+  const middleClip = cut[1] < cut[0] ? 'url(#cut-gap)' : 'url(#cut-under-b)'
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-6">
-        <GroupTag name={`${groupNames[0]} above`} color="var(--color-groupA)" />
-        <GroupTag name={`${groupNames[1]} below`} color="var(--color-groupB)" />
+        <GroupTag
+          name={`${groupNames[0]}${value[0] === null ? '' : ` ${percent(value[0], 0)} approved`}`}
+          color="var(--color-groupA)"
+        />
+        <GroupTag
+          name={`${groupNames[1]}${value[1] === null ? '' : ` ${percent(value[1], 0)} approved`}`}
+          color="var(--color-groupB)"
+        />
       </div>
 
       <div ref={boxRef} className="relative min-h-[132px] flex-1 touch-none select-none">
@@ -110,37 +154,92 @@ export default function ScoreDistribution({
           className="absolute inset-0 h-full w-full"
           aria-hidden="true"
         >
-          <defs>
-            <clipPath id="lit-a">
-              <rect x={thresholds[0] * W} y={0} width={W} height={HALF} />
-            </clipPath>
-            <clipPath id="lit-b">
-              <rect
-                x={(splitMode ? thresholds[1] : thresholds[0]) * W}
-                y={HALF + GUTTER}
-                width={W}
-                height={HALF}
-              />
-            </clipPath>
-          </defs>
+          {GUIDES.map((g) => (
+            <line
+              key={g}
+              x1={0}
+              x2={W}
+              y1={(1 - g) * H}
+              y2={(1 - g) * H}
+              stroke="var(--color-hair)"
+              strokeWidth={1}
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
 
-          {bars ? (
+          {curves ? (
             <>
+              <defs>
+                <clipPath id="cut-gap">
+                  <path d={curves.gap} />
+                </clipPath>
+                <clipPath id="cut-under-b">
+                  <path d={curves.areaB} />
+                </clipPath>
+                <clipPath id="cut-lit-a">
+                  <rect x={cut[0] * W} y={0} width={W} height={H} />
+                </clipPath>
+                <clipPath id="cut-lit-b">
+                  <rect x={cut[1] * W} y={0} width={W} height={H} />
+                </clipPath>
+              </defs>
+
               <g className="rise-up" style={{ '--rise-origin': '100%' }}>
-                <g opacity={DIM}>
-                  <Bars series={bars.a} peak={bars.peakA} up lit="var(--color-groupA)" />
+                <path d={curves.areaA} fill="var(--color-groupA)" opacity={FILL} />
+                <path d={curves.areaB} fill="var(--color-groupB)" opacity={FILL} />
+
+                <rect
+                  x={0}
+                  y={0}
+                  width={lower * W}
+                  height={H}
+                  fill="var(--color-panel)"
+                  opacity={SCRIM}
+                />
+                {upper > lower ? (
+                  <rect
+                    x={lower * W}
+                    y={0}
+                    width={(upper - lower) * W}
+                    height={H}
+                    fill="var(--color-panel)"
+                    opacity={SCRIM}
+                    clipPath={middleClip}
+                  />
+                ) : null}
+
+                <g opacity={EDGE_DIM}>
+                  <path
+                    d={curves.lineA}
+                    fill="none"
+                    stroke="var(--color-groupA)"
+                    strokeWidth={1.5}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <path
+                    d={curves.lineB}
+                    fill="none"
+                    stroke="var(--color-groupB)"
+                    strokeWidth={1.5}
+                    vectorEffect="non-scaling-stroke"
+                  />
                 </g>
-                <g clipPath="url(#lit-a)">
-                  <Bars series={bars.a} peak={bars.peakA} up lit="var(--color-groupA)" />
-                </g>
-              </g>
-              <g className="rise-up" style={{ '--rise-origin': '0%' }}>
-                <g opacity={DIM}>
-                  <Bars series={bars.b} peak={bars.peakB} up={false} lit="var(--color-groupB)" />
-                </g>
-                <g clipPath="url(#lit-b)">
-                  <Bars series={bars.b} peak={bars.peakB} up={false} lit="var(--color-groupB)" />
-                </g>
+                <path
+                  d={curves.lineA}
+                  fill="none"
+                  stroke="var(--color-groupA)"
+                  strokeWidth={1.5}
+                  vectorEffect="non-scaling-stroke"
+                  clipPath="url(#cut-lit-a)"
+                />
+                <path
+                  d={curves.lineB}
+                  fill="none"
+                  stroke="var(--color-groupB)"
+                  strokeWidth={1.5}
+                  vectorEffect="non-scaling-stroke"
+                  clipPath="url(#cut-lit-b)"
+                />
               </g>
             </>
           ) : null}
@@ -148,48 +247,58 @@ export default function ScoreDistribution({
           <line
             x1={0}
             x2={W}
-            y1={HALF + GUTTER / 2}
-            y2={HALF + GUTTER / 2}
+            y1={H}
+            y2={H}
             stroke="var(--color-edge)"
             strokeWidth={1}
             vectorEffect="non-scaling-stroke"
           />
 
-          {lines.map((line) => (
+          {lines.map((cutLine) => (
             <line
-              key={line.group}
-              x1={line.value * W}
-              x2={line.value * W}
-              y1={line.up === false ? HALF + GUTTER : 0}
-              y2={line.up === true ? HALF : H}
-              stroke={line.color}
+              key={cutLine.group}
+              x1={cutLine.value * W}
+              x2={cutLine.value * W}
+              y1={0}
+              y2={H}
+              stroke={cutLine.color}
               strokeWidth={1}
               vectorEffect="non-scaling-stroke"
             />
           ))}
         </svg>
 
-        {lines.map((line) => (
+        <span
+          aria-hidden="true"
+          className="n-xs pointer-events-none absolute top-1/2 right-0 -translate-y-1/2 bg-panel pl-1 text-dim"
+        >
+          50%
+        </span>
+
+        {lines.map((cutLine) => (
           <div
-            key={line.group}
+            key={cutLine.group}
             aria-hidden="true"
-            onPointerDown={startDrag(line.group)}
-            className="absolute w-7 -translate-x-1/2 cursor-ew-resize"
-            style={{
-              left: `${line.value * 100}%`,
-              top: line.up === false ? '50%' : 0,
-              bottom: line.up === true ? '50%' : 0,
-            }}
-          >
+            onPointerDown={startDrag(cutLine.group)}
+            className="absolute inset-y-0 w-7 -translate-x-1/2 cursor-ew-resize"
+            style={{ left: `${cutLine.value * 100}%` }}
+          />
+        ))}
+
+        {[0, 1].map((group) =>
+          value[group] === null ? null : (
             <span
-              className="absolute left-1/2 h-[7px] w-[7px] -translate-x-1/2 rounded-[1px]"
+              key={group}
+              aria-hidden="true"
+              className="pointer-events-none absolute h-[9px] w-[9px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-panel"
               style={{
-                background: line.color,
-                [line.up === false ? 'bottom' : 'top']: 0,
+                background: group === 0 ? 'var(--color-groupA)' : 'var(--color-groupB)',
+                left: `${cut[group] * 100}%`,
+                top: `${(1 - value[group]) * 100}%`,
               }}
             />
-          </div>
-        ))}
+          ),
+        )}
       </div>
 
       <div className="relative mt-2 h-6">
