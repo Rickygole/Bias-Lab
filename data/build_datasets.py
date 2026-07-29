@@ -178,7 +178,7 @@ def build_admissions() -> dict:
         + 0.16 * activities
         + 0.34 * recommendation
         - 0.0012 * counselor_ratio
-        + rng.normal(0, 0.7, n)
+        + rng.normal(0, 1.45, n)
     )
     admitted = (committee > np.quantile(committee, 0.68)).astype(int)
 
@@ -230,11 +230,12 @@ def build_medical() -> dict:
 
     access = np.where(group == 1, 0.62, 1.0)
     visits = np.clip(rng.poisson(np.clip(access * (1.15 * illness + 1.0), 0.05, None), n), 0, 30)
-    prior_cost = np.clip(
-        access * (2400 * illness + rng.normal(1800, 900, n)), 120, None
-    )
 
-    high_risk = (prior_cost > np.quantile(prior_cost, 0.74)).astype(int)
+    last_year_cost = np.clip(access * (2400 * illness + rng.normal(2600, 2200, n)), 120, None)
+    next_year_cost = np.clip(access * (2400 * illness + rng.normal(2600, 2200, n)), 120, None)
+
+    prior_cost = last_year_cost
+    high_risk = (next_year_cost > np.quantile(next_year_cost, 0.74)).astype(int)
 
     frame = pd.DataFrame({
         "age": age,
