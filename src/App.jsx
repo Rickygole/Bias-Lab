@@ -4,7 +4,7 @@ import { loadDataset } from './data/index.js'
 import { outcomes as outcomeLabels } from './data/cards.js'
 import { fairness, humanCost, overallAccuracy, rocCurve } from './ml/metrics.js'
 import { runTraining } from './ml/runTraining.js'
-import { readUrlState, writeUrlState } from './lib/urlState.js'
+import { readUrlState, shouldOpenTour, writeUrlState } from './lib/urlState.js'
 import TopBar from './components/TopBar.jsx'
 import LeftRail from './components/LeftRail.jsx'
 import Panel from './components/Panel.jsx'
@@ -23,7 +23,10 @@ const EMPTY = fairness([], [], [], [0.5, 0.5]).definitions
 
 export default function App() {
   const [state, dispatch] = useReducer(appReducer, undefined, () =>
-    makeInitialState(readUrlState(window.location.search)),
+    makeInitialState({
+      ...readUrlState(window.location.search),
+      ...(shouldOpenTour(window.location.search, window.sessionStorage) ? { tourStep: 0 } : {}),
+    }),
   )
   const cancelRef = useRef(null)
 
