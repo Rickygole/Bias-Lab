@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
 import { appReducer, initialState } from './state/appReducer.js'
 import { loadDataset } from './data/index.js'
 import { fairness, humanCost, overallAccuracy, rocCurve } from './ml/metrics.js'
+import { runTraining } from './ml/runTraining.js'
 import TopBar from './components/TopBar.jsx'
 import LeftRail from './components/LeftRail.jsx'
 import Panel from './components/Panel.jsx'
@@ -17,7 +18,7 @@ const LR = 1.5
 
 export default function App() {
   const [state, dispatch] = useReducer(appReducer, initialState)
-  const workerRef = useRef(null)
+  const cancelRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
@@ -33,35 +34,23 @@ export default function App() {
     if (!state.dataset) return
     dispatch({ type: 'trainStarted' })
 
-    workerRef.current?.terminate()
-    const worker = new Worker(new URL('./ml/train.worker.js', import.meta.url), { type: 'module' })
-    workerRef.current = worker
-
-    worker.onmessage = (event) => {
-      const message = event.data
-      if (message.type === 'progress') {
-        dispatch({
-          type: 'trainProgress',
-          epoch: message.epoch,
-          point: { epoch: message.epoch, loss: message.loss },
-        })
-      } else if (message.type === 'done') {
-        dispatch({
-          type: 'trainDone',
-          model: { weights: message.weights, bias: message.bias },
-          scores: message.scores,
-          history: message.history,
-        })
-        worker.terminate()
-        workerRef.current = null
-      }
-    }
-
-    worker.postMessage({
-      train: state.dataset.train,
-      test: { X: state.dataset.test.X },
+    cancelRef.current?.()
+    cancelRef.current = runTraining({
+      trainSet: state.dataset.train,
+      test: state.dataset.test,
       epochs: EPOCHS,
       lr: LR,
+      onProgress: (epoch, loss) =>
+        dispatch({ type: 'trainProgress', epoch, point: { epoch, loss } }),
+      onDone: ({ weights, bias, history, scores }) => {
+        cancelRef.current = null
+        dispatch({
+          type: 'trainDone',
+          model: { weights, bias },
+          scores,
+          history,
+        })
+      },
     })
   }, [state.dataset])
 
@@ -69,7 +58,7 @@ export default function App() {
     if (state.status === 'ready') train()
   }, [state.status, train])
 
-  useEffect(() => () => workerRef.current?.terminate(), [])
+  useEffect(() => () => cancelRef.current?.(), [])
 
   const derived = useMemo(() => {
     if (!state.scores || !state.dataset) return null
