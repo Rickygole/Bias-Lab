@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
-import { appReducer, initialState } from './state/appReducer.js'
+import { appReducer, makeInitialState } from './state/appReducer.js'
 import { loadDataset } from './data/index.js'
 import { fairness, humanCost, overallAccuracy, rocCurve } from './ml/metrics.js'
 import { runTraining } from './ml/runTraining.js'
+import { readUrlState, writeUrlState } from './lib/urlState.js'
 import TopBar from './components/TopBar.jsx'
 import LeftRail from './components/LeftRail.jsx'
 import Panel from './components/Panel.jsx'
@@ -17,7 +18,9 @@ const EPOCHS = 4000
 const LR = 1.5
 
 export default function App() {
-  const [state, dispatch] = useReducer(appReducer, initialState)
+  const [state, dispatch] = useReducer(appReducer, undefined, () =>
+    makeInitialState(readUrlState(window.location.search)),
+  )
   const cancelRef = useRef(null)
 
   useEffect(() => {
@@ -59,6 +62,15 @@ export default function App() {
   }, [state.status, train])
 
   useEffect(() => () => cancelRef.current?.(), [])
+
+  useEffect(() => {
+    const query = writeUrlState({
+      datasetId: state.datasetId,
+      thresholds: state.thresholds,
+      splitMode: state.splitMode,
+    })
+    window.history.replaceState(null, '', `${window.location.pathname}${query}`)
+  }, [state.datasetId, state.thresholds, state.splitMode])
 
   const derived = useMemo(() => {
     if (!state.scores || !state.dataset) return null
