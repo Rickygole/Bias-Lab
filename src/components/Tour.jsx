@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 
 export const steps = [
   {
-    body: 'This model is about 82 percent accurate. That number is real. Watch what it hides.',
+    body: 'This model is about 84 percent accurate. That number is real. Watch what it hides.',
     needs: 'trained',
   },
   {
@@ -14,7 +14,11 @@ export const steps = [
     needs: 'trained',
   },
   {
-    body: 'Now switch to separate thresholds. You can equalize one definition exactly. You still cannot equalize them all.',
+    body: 'Now switch to separate thresholds. You can equalize one definition almost exactly. You still cannot equalize them all.',
+    needs: 'trained',
+  },
+  {
+    body: 'Watch the intervals while you do it. A gap marked not certain is one this test set is too small to measure, not one that has gone away. Fairness auditing runs into this constantly.',
     needs: 'trained',
   },
   {

@@ -5,13 +5,15 @@ import { percent } from '../lib/format.js'
 
 const MAX_GAP = 0.6
 
-function GapBar({ values }) {
+function GapBar({ values, interval }) {
   const [a, b] = values
   if (a === null || b === null) return <div className="h-4" />
 
   const signed = b - a
   const magnitude = Math.min(1, Math.abs(signed) / MAX_GAP)
   const color = signed >= 0 ? 'var(--color-groupB)' : 'var(--color-groupA)'
+  const uncertain = interval !== null && interval !== undefined && !interval.separated
+  const margin = interval ? Math.min(1, interval.margin / MAX_GAP) * 50 : 0
 
   return (
     <div className="relative h-4 w-full">
@@ -20,16 +22,31 @@ function GapBar({ values }) {
         className="absolute top-1/2 h-2 -translate-y-1/2 rounded-[1px] transition-all duration-200"
         style={{
           background: color,
+          opacity: uncertain ? 0.35 : 1,
           width: `${magnitude * 50}%`,
           left: signed >= 0 ? '50%' : undefined,
           right: signed < 0 ? '50%' : undefined,
         }}
       />
+      {interval ? (
+        <div
+          className="absolute top-1/2 h-px -translate-y-1/2 transition-all duration-200"
+          style={{
+            background: 'var(--color-muted)',
+            width: `${margin * 2}%`,
+            left: signed >= 0 ? `${50 + magnitude * 50 - margin}%` : undefined,
+            right: signed < 0 ? `${50 + magnitude * 50 - margin}%` : undefined,
+          }}
+        />
+      ) : null}
     </div>
   )
 }
 
 function Row({ definition }) {
+  const interval = definition.interval
+  const uncertain = interval && !interval.separated
+
   return (
     <tr>
       <td className="py-2 pr-4 align-middle">
@@ -43,10 +60,15 @@ function Row({ definition }) {
         <AnimatedNumber value={definition.values[1]} format={(v) => percent(v, 1)} />
       </td>
       <td className="w-24 py-2 pl-4 align-middle">
-        <GapBar values={definition.values} />
+        <GapBar values={definition.values} interval={interval} />
       </td>
-      <td className="num w-14 py-2 pl-2 text-right align-middle">
-        <AnimatedNumber value={definition.gap} format={(v) => percent(v, 1)} />
+      <td className="w-20 py-2 pl-2 text-right align-middle">
+        <AnimatedNumber
+          value={definition.gap}
+          format={(v) => percent(v, 1)}
+          className={`num ${uncertain ? 'text-muted' : ''}`}
+        />
+        {uncertain ? <div className="text-[11px] leading-tight text-muted">not certain</div> : null}
       </td>
     </tr>
   )
@@ -124,7 +146,7 @@ export default function FairnessTable({ result, groupNames }) {
             <th className="label w-16 pb-2 pl-3 text-right font-normal">{groupNames[0]}</th>
             <th className="label w-16 pb-2 pl-3 text-right font-normal">{groupNames[1]}</th>
             <th className="label w-24 pb-2 pl-4 text-left font-normal">Gap</th>
-            <th className="label w-14 pb-2 pl-2 text-right font-normal">
+            <th className="label w-20 pb-2 pl-2 text-right font-normal">
               <span className="sr-only">Gap size</span>
             </th>
           </tr>
@@ -151,6 +173,12 @@ export default function FairnessTable({ result, groupNames }) {
       <p className="mt-4 text-[11px] leading-snug text-muted">
         Calibration is a property of the scores, not of the threshold, so it holds still while you
         drag. It is the reason the rows above cannot all reach zero at once.
+      </p>
+
+      <p className="mt-2 text-[11px] leading-snug text-muted">
+        The thin line through each bar is a 95 percent interval. Where it crosses the centre the gap
+        is marked not certain, which means this test set is too small to tell it apart from zero. A
+        gap you cannot measure is not the same as a gap that is not there.
       </p>
 
       <p className="mt-auto border-t border-edge pt-4 leading-relaxed">
