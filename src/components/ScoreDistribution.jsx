@@ -1,15 +1,36 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { histogram } from '../ml/metrics.js'
-import Pending from './Pending.jsx'
+import GroupTag from './GroupTag.jsx'
 
-const BINS = 20
-const WIDTH = 100
-const HEIGHT = 200
-const INSET = 1
-const TOP = 12
-const BOTTOM = 8
-const PLOT = WIDTH - INSET * 2
-const FLOOR = HEIGHT - TOP - BOTTOM
+const BINS = 40
+const W = 100
+const HALF = 78
+const H = HALF * 2
+const DIM = 0.24
+const TICKS = [0, 0.25, 0.5, 0.75, 1]
+
+function density(counts) {
+  const total = counts.reduce((sum, c) => sum + c, 0)
+  return total === 0 ? counts.map(() => 0) : counts.map((c) => c / total)
+}
+
+function Bars({ series, peak, up, lit }) {
+  const width = W / BINS
+  return series.map((value, i) => {
+    const h = peak === 0 ? 0 : (value / peak) * HALF
+    if (h <= 0) return null
+    return (
+      <rect
+        key={i}
+        x={i * width}
+        y={up ? HALF - h : HALF}
+        width={width - 0.35}
+        height={h}
+        fill={lit}
+      />
+    )
+  })
+}
 
 export default function ScoreDistribution({
   scores,
@@ -23,11 +44,10 @@ export default function ScoreDistribution({
   const dragging = useRef(null)
 
   const bars = useMemo(() => {
-    if (!scores) return null
-    const a = histogram(scores, groups, 0, BINS)
-    const b = histogram(scores, groups, 1, BINS)
-    const peak = Math.max(...a, ...b, 1)
-    return { a, b, peak }
+    if (!scores || !groups) return null
+    const a = density(histogram(scores, groups, 0, BINS))
+    const b = density(histogram(scores, groups, 1, BINS))
+    return { a, b, peak: Math.max(...a, ...b, 1e-9) }
   }, [scores, groups])
 
   const positionFromEvent = useCallback((event) => {
@@ -35,8 +55,7 @@ export default function ScoreDistribution({
     if (!box) return null
     const rect = box.getBoundingClientRect()
     if (rect.width === 0) return null
-    const fraction = ((event.clientX - rect.left) / rect.width) * WIDTH
-    return Math.min(1, Math.max(0, (fraction - INSET) / PLOT))
+    return Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width))
   }, [])
 
   const handleMove = useCallback(
@@ -62,12 +81,6 @@ export default function ScoreDistribution({
     }
   }, [handleMove])
 
-  if (!bars) {
-    return (
-      <Pending>One histogram per group, under a threshold line you can drag across them.</Pending>
-    )
-  }
-
   const startDrag = (group) => (event) => {
     event.preventDefault()
     dragging.current = group
@@ -75,79 +88,84 @@ export default function ScoreDistribution({
     if (value !== null) onThreshold(group, Math.round(value * 100) / 100)
   }
 
-  const barWidth = PLOT / BINS
-
-  const series = [
-    { counts: bars.a, color: 'var(--color-groupA)', name: groupNames[0] },
-    { counts: bars.b, color: 'var(--color-groupB)', name: groupNames[1] },
-  ]
-
   const lines = splitMode
     ? [
-        { group: 0, value: thresholds[0], color: 'var(--color-groupA)' },
-        { group: 1, value: thresholds[1], color: 'var(--color-groupB)' },
+        { group: 0, value: thresholds[0], color: 'var(--color-groupA)', up: true },
+        { group: 1, value: thresholds[1], color: 'var(--color-groupB)', up: false },
       ]
-    : [{ group: 0, value: thresholds[0], color: 'var(--color-ink)' }]
+    : [{ group: 0, value: thresholds[0], color: 'var(--color-ink)', up: null }]
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="mb-4 flex gap-6">
-        {series.map((s) => (
-          <span key={s.name} className="flex items-center gap-2 text-[11px] text-muted">
-            <span className="h-2 w-2 rounded-[1px]" style={{ background: s.color }} />
-            {s.name}
-          </span>
-        ))}
+    <div className="flex flex-col">
+      <div className="mb-3 flex items-center gap-5">
+        <GroupTag name={`${groupNames[0]} above`} color="var(--color-groupA)" />
+        <GroupTag name={`${groupNames[1]} below`} color="var(--color-groupB)" />
       </div>
 
-      <div ref={boxRef} className="relative min-h-[200px] flex-1 touch-none select-none">
+      <div ref={boxRef} className="relative h-[168px] touch-none select-none">
         <svg
-          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
           className="absolute inset-0 h-full w-full"
           aria-hidden="true"
         >
-          <g transform={`translate(${INSET}, ${TOP})`}>
-            {series.map((s) =>
-              s.counts.map((c, i) => {
-                const h = (c / bars.peak) * FLOOR
-                return (
-                  <rect
-                    key={`${s.name}-${i}`}
-                    x={i * barWidth}
-                    y={FLOOR - h}
-                    width={barWidth - 0.15}
-                    height={h}
-                    fill={s.color}
-                    opacity={0.7}
-                  />
-                )
-              }),
-            )}
+          <defs>
+            <clipPath id="lit-a">
+              <rect x={thresholds[0] * W} y={0} width={W} height={HALF} />
+            </clipPath>
+            <clipPath id="lit-b">
+              <rect
+                x={(splitMode ? thresholds[1] : thresholds[0]) * W}
+                y={HALF}
+                width={W}
+                height={HALF}
+              />
+            </clipPath>
+          </defs>
 
+          {bars ? (
+            <>
+              <g className="rise-up" style={{ '--rise-origin': '100%' }}>
+                <g opacity={DIM}>
+                  <Bars series={bars.a} peak={bars.peak} up lit="var(--color-groupA)" />
+                </g>
+                <g clipPath="url(#lit-a)">
+                  <Bars series={bars.a} peak={bars.peak} up lit="var(--color-groupA)" />
+                </g>
+              </g>
+              <g className="rise-up" style={{ '--rise-origin': '0%' }}>
+                <g opacity={DIM}>
+                  <Bars series={bars.b} peak={bars.peak} up={false} lit="var(--color-groupB)" />
+                </g>
+                <g clipPath="url(#lit-b)">
+                  <Bars series={bars.b} peak={bars.peak} up={false} lit="var(--color-groupB)" />
+                </g>
+              </g>
+            </>
+          ) : null}
+
+          <line
+            x1={0}
+            x2={W}
+            y1={HALF}
+            y2={HALF}
+            stroke="var(--color-edge)"
+            strokeWidth={1}
+            vectorEffect="non-scaling-stroke"
+          />
+
+          {lines.map((line) => (
             <line
-              x1={0}
-              x2={PLOT}
-              y1={FLOOR}
-              y2={FLOOR}
-              stroke="var(--color-edge)"
+              key={line.group}
+              x1={line.value * W}
+              x2={line.value * W}
+              y1={line.up === false ? HALF : 0}
+              y2={line.up === true ? HALF : H}
+              stroke={line.color}
               strokeWidth={1}
               vectorEffect="non-scaling-stroke"
             />
-
-            {lines.map((line) => (
-              <line
-                key={line.group}
-                x1={line.value * PLOT}
-                x2={line.value * PLOT}
-                y1={-TOP}
-                y2={FLOOR}
-                stroke={line.color}
-                strokeWidth={1}
-                vectorEffect="non-scaling-stroke"
-              />
-            ))}
-          </g>
+          ))}
         </svg>
 
         {lines.map((line) => (
@@ -155,21 +173,43 @@ export default function ScoreDistribution({
             key={line.group}
             aria-hidden="true"
             onPointerDown={startDrag(line.group)}
-            className="absolute top-0 bottom-[4%] w-6 -translate-x-1/2 cursor-ew-resize"
-            style={{ left: `${INSET + line.value * PLOT}%` }}
+            className="absolute w-7 -translate-x-1/2 cursor-ew-resize"
+            style={{
+              left: `${line.value * 100}%`,
+              top: line.up === false ? '50%' : 0,
+              bottom: line.up === true ? '50%' : 0,
+            }}
           >
             <span
-              className="absolute top-0 left-1/2 h-2 w-2 -translate-x-1/2 rounded-[1px]"
-              style={{ background: line.color }}
+              className="absolute left-1/2 h-[7px] w-[7px] -translate-x-1/2 rounded-[1px]"
+              style={{
+                background: line.color,
+                [line.up === false ? 'bottom' : 'top']: 0,
+              }}
             />
           </div>
         ))}
       </div>
 
-      <div className="mt-2 flex justify-between text-[11px] text-muted">
-        <span className="num">0.00</span>
-        <span>model score</span>
-        <span className="num">1.00</span>
+      <div className="relative mt-2 h-6">
+        {TICKS.map((t, i) => (
+          <span
+            key={t}
+            className="absolute top-0 flex flex-col items-center gap-1.5"
+            style={{
+              left: `${t * 100}%`,
+              transform:
+                i === 0
+                  ? 'none'
+                  : i === TICKS.length - 1
+                    ? 'translateX(-100%)'
+                    : 'translateX(-50%)',
+            }}
+          >
+            <span className="h-1.5 w-px bg-edge" />
+            <span className="n-xs text-dim">{t.toFixed(2)}</span>
+          </span>
+        ))}
       </div>
     </div>
   )
