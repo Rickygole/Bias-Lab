@@ -2,42 +2,86 @@ import { useState } from 'react'
 import { cards } from '../data/cards.js'
 import ThresholdSlider from './ThresholdSlider.jsx'
 import Segmented from './Segmented.jsx'
-import { decimal, percent } from '../lib/format.js'
+import AnimatedNumber from './AnimatedNumber.jsx'
+import { count, decimal, percent, points } from '../lib/format.js'
+
+const CHANCE = Math.LN2
+const CURVE_W = 100
+const CURVE_H = 34
 
 const modeOptions = [
   { value: false, label: 'Single threshold' },
   { value: true, label: 'Separate thresholds' },
 ]
 
-function LossSparkline({ history, draw }) {
-  if (history.length < 2) return <div className="h-10" />
-  const values = history.map((h) => Math.log(Math.max(h.loss, 1e-6)))
-  const max = Math.max(...values)
-  const min = Math.min(...values)
-  const span = max - min || 1
-  const points = values
-    .map((v, i) => `${(i / (values.length - 1)) * 100},${40 - ((v - min) / span) * 36}`)
+function Card({ title, note, children, className = '' }) {
+  return (
+    <section className={`plate px-4 pt-3.5 pb-4 ${className}`}>
+      <header className="flex items-baseline justify-between gap-3 border-b border-edge pb-2.5">
+        <h2 className="label text-ink">{title}</h2>
+        {note ? <span className="note text-dim">{note}</span> : null}
+      </header>
+      <div className="pt-3.5">{children}</div>
+    </section>
+  )
+}
+
+function LossCurve({ history, epochs }) {
+  const series = [{ epoch: 0, loss: CHANCE }, ...history]
+  const points = series
+    .map((h) => {
+      const x = Math.min(1, h.epoch / epochs) * CURVE_W
+      const y = CURVE_H - Math.min(1, Math.max(0, h.loss / CHANCE)) * CURVE_H
+      return `${x.toFixed(2)},${y.toFixed(2)}`
+    })
     .join(' ')
 
   return (
-    <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-10 w-full" aria-hidden="true">
-      <polyline
-        points={points}
-        fill="none"
-        stroke="var(--color-groupA)"
-        strokeWidth={1.2}
+    <svg
+      viewBox={`0 0 ${CURVE_W} ${CURVE_H}`}
+      preserveAspectRatio="none"
+      className="h-[34px] w-full"
+      aria-hidden="true"
+    >
+      <line
+        x1={0}
+        x2={CURVE_W}
+        y1={0.5}
+        y2={0.5}
+        stroke="var(--color-hair)"
+        strokeWidth={1}
+        strokeDasharray="2 3"
         vectorEffect="non-scaling-stroke"
-        style={
-          draw
-            ? {
-                strokeDasharray: 400,
-                strokeDashoffset: 400,
-                animation: 'draw-in 900ms ease-out forwards',
-              }
-            : undefined
-        }
       />
+      <line
+        x1={0}
+        x2={CURVE_W}
+        y1={CURVE_H - 0.5}
+        y2={CURVE_H - 0.5}
+        stroke="var(--color-edge)"
+        strokeWidth={1}
+        vectorEffect="non-scaling-stroke"
+      />
+      {series.length > 1 ? (
+        <polyline
+          points={points}
+          fill="none"
+          stroke="var(--color-groupA)"
+          strokeWidth={1.25}
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      ) : null}
     </svg>
+  )
+}
+
+function Readout({ value, format, label }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <AnimatedNumber value={value} format={format} className="n-md text-ink" blankWidth={26} />
+      <span className="label text-dim">{label}</span>
+    </div>
   )
 }
 
@@ -46,16 +90,16 @@ function DatasetCard({ datasetId, dataset }) {
   const card = cards[datasetId]
 
   return (
-    <div className="rounded-md border border-edge bg-panel p-4">
-      <div className="label mb-2 text-ink">
-        {dataset?.source === 'real' ? 'Real data' : 'Synthetic data'}
-      </div>
-      <p className="leading-relaxed text-muted">{card.short}</p>
+    <Card
+      title={dataset?.source === 'real' ? 'Real data' : 'Synthetic data'}
+      note={dataset?.groupAttribute}
+    >
+      <p className="read">{card.short}</p>
 
       {open ? (
-        <div className="mt-4 space-y-4 border-t border-edge pt-4">
+        <div className="mt-3.5 space-y-3 border-t border-hair pt-3.5">
           {card.full.map((paragraph, i) => (
-            <p key={i} className="leading-relaxed text-muted">
+            <p key={i} className="read">
               {paragraph}
             </p>
           ))}
@@ -66,19 +110,105 @@ function DatasetCard({ datasetId, dataset }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="mt-4 rounded-[2px] text-[11px] text-muted underline underline-offset-4 transition-colors duration-150 hover:text-ink"
+        className="link note mt-3.5 inline-block"
       >
         {open ? 'Show less' : 'Read the full card'}
       </button>
-    </div>
+    </Card>
+  )
+}
+
+function CompositionCard({ composition, groupNames, qualifiedLabel }) {
+  const total = composition ? composition[0].n + composition[1].n : null
+  const spread =
+    composition && composition[0].baseRate !== null && composition[1].baseRate !== null
+      ? Math.abs(composition[0].baseRate - composition[1].baseRate)
+      : null
+
+  return (
+    <Card title="Test set" note={total === null ? null : `${count(total)} people`}>
+      <div className="flex flex-col gap-3">
+        {[0, 1].map((g) => {
+          const color = g === 0 ? 'var(--color-groupA)' : 'var(--color-groupB)'
+          const rate = composition?.[g].baseRate ?? null
+          return (
+            <div key={g}>
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="swatch" style={{ background: color }} />
+                  <span className="note truncate text-ink">{groupNames[g]}</span>
+                </span>
+                <AnimatedNumber
+                  value={composition?.[g].n ?? null}
+                  format={count}
+                  className="n-xs text-dim"
+                  blankWidth={20}
+                />
+              </div>
+              <div className="mt-2 flex items-center gap-3">
+                <span className="h-[5px] flex-1 bg-hair">
+                  <span
+                    className="block h-[5px] transition-[width] duration-300 ease-out"
+                    style={{ width: `${(rate ?? 0) * 100}%`, background: color }}
+                  />
+                </span>
+                <AnimatedNumber
+                  value={rate}
+                  format={(v) => percent(v, 1)}
+                  className="n-sm w-12 text-right text-ink"
+                  blankWidth={20}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      <p className="note mt-3 text-dim">Share of each group who {qualifiedLabel}.</p>
+
+      <p className="note mt-3.5 border-t border-hair pt-3 text-muted">
+        {spread === null
+          ? 'These are the base rates. Their difference drives everything below.'
+          : `The base rates differ by ${points(spread, 1)} points. When they do, no imperfect model can be calibrated and have equal error rates at the same time. That is the wall you are about to hit.`}
+      </p>
+    </Card>
+  )
+}
+
+function ModelCard({ status, epoch, epochs, history, accuracy, auc }) {
+  const last = history.at(-1)?.loss ?? null
+
+  return (
+    <Card
+      title="Model"
+      note={status === 'trained' ? `${count(epochs)} epochs` : `epoch ${count(epoch)}`}
+    >
+      <LossCurve history={history} epochs={epochs} />
+
+      <div className="mt-2 flex items-baseline justify-between gap-3">
+        <span className="note text-dim">Training loss</span>
+        <span className="n-xs text-muted">
+          {decimal(CHANCE, 3)}
+          <span className="px-1 text-dim">to</span>
+          <span className="text-ink">{last === null ? decimal(CHANCE, 3) : decimal(last, 3)}</span>
+        </span>
+      </div>
+
+      <div className="mt-3.5 grid grid-cols-2 gap-3 border-t border-hair pt-3.5">
+        <Readout value={accuracy} format={(v) => percent(v, 1)} label="Test accuracy" />
+        <Readout value={auc} format={(v) => decimal(v, 3)} label="AUC" />
+      </div>
+    </Card>
   )
 }
 
 export default function LeftRail({
   datasetId,
   dataset,
+  composition,
   status,
   epoch,
+  epochs,
   history,
   accuracy,
   auc,
@@ -90,55 +220,40 @@ export default function LeftRail({
 }) {
   const groupNames = dataset?.groupNames ?? ['Group A', 'Group B']
   const positive = dataset?.positiveLabel?.toLowerCase() ?? 'approved'
+  const qualifiedLabel = dataset?.qualifiedLabel ?? 'qualify'
 
   return (
-    <aside className="scroller flex w-full shrink-0 flex-col gap-4 border-edge p-6 lg:w-80 lg:overflow-y-auto lg:border-r">
+    <aside className="scroller order-last flex w-full shrink-0 flex-col gap-4 border-edge px-6 py-4 lg:order-none lg:w-[340px] lg:overflow-y-auto lg:border-r lg:px-5">
       <DatasetCard datasetId={datasetId} dataset={dataset} />
 
-      <div className="rounded-md border border-edge bg-panel p-4">
-        {status === 'trained' ? (
-          <div>
-            <div className="mb-2 flex items-baseline justify-between gap-4">
-              <span className="label text-ink">Trained</span>
-              <span className="text-[11px] text-muted">training loss</span>
-            </div>
-            <LossSparkline history={history} draw />
-            <div className="mt-4 flex justify-between text-[11px] text-muted">
-              <span>
-                Test accuracy <span className="num text-ink">{percent(accuracy, 1)}</span>
-              </span>
-              <span>
-                AUC <span className="num text-ink">{decimal(auc, 3)}</span>
-              </span>
-            </div>
-          </div>
-        ) : status === 'training' ? (
-          <div>
-            <div className="mb-2 flex items-baseline justify-between gap-4">
-              <span className="label text-ink">Training</span>
-              <span className="text-[11px] text-muted">training loss</span>
-            </div>
-            <LossSparkline history={history} />
-            <div className="mt-4 text-[11px] text-muted">
-              epoch <span className="num text-ink">{epoch}</span>
-            </div>
-          </div>
-        ) : (
-          <div className="label text-muted">Loading dataset</div>
-        )}
-      </div>
+      <CompositionCard
+        composition={composition}
+        groupNames={groupNames}
+        qualifiedLabel={qualifiedLabel}
+      />
 
-      {status === 'trained' ? (
-        <div className="flex flex-col gap-4 rounded-md border border-edge bg-panel p-4">
+      <ModelCard
+        status={status}
+        epoch={epoch}
+        epochs={epochs}
+        history={history}
+        accuracy={accuracy}
+        auc={auc}
+      />
+
+      <Card title="Decision" note="the only control">
+        <div className="hidden flex-col gap-4 pb-4 lg:flex">
           {splitMode ? (
             <>
               <ThresholdSlider
+                swatch
                 value={thresholds[0]}
                 onChange={(v) => onThreshold(0, v)}
                 color="var(--color-groupA)"
                 label={groupNames[0]}
               />
               <ThresholdSlider
+                swatch
                 value={thresholds[1]}
                 onChange={(v) => onThreshold(1, v)}
                 color="var(--color-groupB)"
@@ -150,40 +265,35 @@ export default function LeftRail({
               value={thresholds[0]}
               onChange={(v) => onThreshold(0, v)}
               color="var(--color-ink)"
+              label="Threshold"
               caption={
                 <>
-                  Applicants scoring above <span className="num">{decimal(thresholds[0], 2)}</span>{' '}
-                  are {positive}.
+                  Everyone scoring above{' '}
+                  <span className="num text-muted">{decimal(thresholds[0], 2)}</span> is {positive}.
                 </>
               }
             />
           )}
-
-          <div className="border-t border-edge pt-4">
-            <Segmented
-              vertical
-              label="Threshold mode"
-              options={modeOptions}
-              value={splitMode}
-              onChange={onSplitMode}
-            />
-            <p className="mt-4 text-[11px] leading-snug text-muted">
-              Setting a different bar for each group is illegal in some contexts and required for
-              fairness in others.
-            </p>
-          </div>
         </div>
-      ) : null}
 
-      <div className="mt-auto hidden pt-4 lg:block">
-        <p className="text-[11px] leading-snug text-muted">
-          Six definitions, one threshold. You cannot satisfy them all at once.
-        </p>
-        <button
-          type="button"
-          onClick={onTour}
-          className="mt-3 rounded-[2px] text-[11px] text-ink underline underline-offset-4 transition-colors duration-150 hover:text-muted"
-        >
+        <div className="lg:border-t lg:border-hair lg:pt-4">
+          <Segmented
+            vertical
+            label="Threshold mode"
+            options={modeOptions}
+            value={splitMode}
+            onChange={onSplitMode}
+          />
+          <p className="note mt-3 text-dim">
+            Setting a different bar for each group is illegal in some contexts and required for
+            fairness in others.
+          </p>
+        </div>
+      </Card>
+
+      <div className="mt-auto hidden pt-2 lg:block">
+        <p className="note text-dim">Six definitions, one threshold. You cannot satisfy them all.</p>
+        <button type="button" onClick={onTour} className="link note mt-2.5 inline-block text-ink">
           Walk through it in six steps
         </button>
       </div>
