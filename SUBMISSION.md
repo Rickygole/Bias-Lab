@@ -118,3 +118,28 @@ asset. The prior work is acknowledged in the README along with the specific delt
 **Screenshot warning:** shots 2 and 3 render a racial health disparity as large numbers. Frame them
 so the left rail is in the picture, because that is where the synthetic data marker lives. A cropped
 screenshot of that panel with no context is how a teaching tool ends up quoted as a finding.
+
+## The demo video
+
+This matters more than the screenshots. The argument of this project is a trade off, and a trade off
+is a change over time, which a still image cannot show. Sixty seconds, screen recording, voice over
+if there is time and captions if there is not.
+
+**0:00 to 0:08.** Page loads and trains itself. "Bias Lab trains a real classifier in your browser,
+then asks you to move one slider."
+
+**0:08 to 0:18.** Point at the left rail. "Logistic regression, written by hand, no machine learning
+library. It matches scikit-learn to seven decimal places."
+
+**0:18 to 0:38.** The important twenty seconds. Drag the threshold slowly from 0.40 to 0.60. Keep the
+cursor near the accuracy number so the viewer watches it not move, then move to the human cost
+panel. "Accuracy went from 83.6 to 83.4. Over that same drag, qualified women denied went from 21 to
+33."
+
+**0:38 to 0:50.** Switch to separate thresholds. Close one gap. "You can equalise one definition.
+Watch what the others do."
+
+**0:50 to 1:00.** Tour step six, hold on the impossibility sentence. End on the URL.
+
+Do not narrate the whole interface. The single job of this video is that the viewer watches the
+accuracy number hold still while the human numbers move.

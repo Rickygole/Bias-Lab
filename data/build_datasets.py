@@ -279,7 +279,7 @@ def build_medical() -> dict:
         "groupAttribute": "Race",
         "positiveLabel": "Flagged high risk",
         "negativeLabel": "Not flagged",
-        "qualifiedLabel": "is actually sick",
+        "qualifiedLabel": "are actually sick",
         **split_and_pack(features, high_risk, group, numeric),
     }
 
