@@ -170,7 +170,7 @@ export default function App() {
               title="Score distributions"
               note="drag the line"
               className="lg:order-1 lg:col-span-7"
-              footer="Everything to the right of the line is approved. Each group is scaled to its own size, so the shapes can be compared."
+              footer="Everything to the right of the line is approved. Each group is drawn as a share of itself, on a square root height scale, so the two shapes can be compared."
             >
               <ScoreDistribution
                 scores={state.scores}
@@ -209,7 +209,7 @@ export default function App() {
 
             <Panel
               title="Human cost"
-              note="one square, one person in a hundred"
+              note="per hundred"
               footer={
                 costSpread === null
                   ? 'Filled squares are people who qualified and were turned away anyway.'

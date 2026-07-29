@@ -3,19 +3,15 @@ import { count, percent } from '../lib/format.js'
 
 function Cell({ value, share, harm }) {
   return (
-    <td className="w-[38%] py-2 pl-4 align-top">
+    <td className="py-2.5 pl-4 align-baseline">
       <div className="flex items-baseline justify-end gap-2">
-        <AnimatedNumber value={value} format={count} className="n-md text-ink" blankWidth={16} />
-        <span className="n-xs w-7 text-right text-dim">{percent(share, 0)}</span>
-      </div>
-      <div className="mt-2 h-[3px] w-full bg-hair">
-        <div
-          className="h-[3px] transition-[width] duration-200 ease-out"
-          style={{
-            width: `${Math.min(1, share ?? 0) * 100}%`,
-            background: harm ? 'var(--color-bad)' : 'var(--color-dim)',
-          }}
+        <AnimatedNumber
+          value={value}
+          format={count}
+          className={`n-md ${harm ? 'text-ink' : 'text-dim'}`}
+          blankWidth={16}
         />
+        <span className="n-xs w-7 shrink-0 text-right text-dim">{percent(share, 0)}</span>
       </div>
     </td>
   )
@@ -40,14 +36,14 @@ function Block({ matrix, name, color, outcomes, first }) {
         </th>
       </tr>
       <tr className="border-t border-hair">
-        <th scope="row" className="note py-2 pr-2 text-left font-normal text-muted">
+        <th scope="row" className="note py-2.5 pr-2 text-left font-normal whitespace-nowrap text-muted">
           {outcomes.actual[0]}
         </th>
         <Cell value={matrix?.tp ?? null} share={share('tp')} />
         <Cell value={matrix?.fn ?? null} share={share('fn')} harm />
       </tr>
       <tr className="border-t border-hair">
-        <th scope="row" className="note py-2 pr-2 text-left font-normal text-muted">
+        <th scope="row" className="note py-2.5 pr-2 text-left font-normal whitespace-nowrap text-muted">
           {outcomes.actual[1]}
         </th>
         <Cell value={matrix?.fp ?? null} share={share('fp')} harm />
@@ -66,10 +62,10 @@ export default function ConfusionMatrices({ matrices, groupNames, outcomes }) {
       <thead>
         <tr className="border-b border-edge">
           <th className="label pb-2 text-left font-medium">Outcome</th>
-          <th className="label w-[38%] pb-2 pl-4 text-right font-medium text-ink">
+          <th className="label pb-2 pl-4 text-right font-medium text-ink">
             {outcomes.predicted[0]}
           </th>
-          <th className="label w-[38%] pb-2 pl-4 text-right font-medium text-ink">
+          <th className="label pb-2 pl-4 text-right font-medium text-ink">
             {outcomes.predicted[1]}
           </th>
         </tr>

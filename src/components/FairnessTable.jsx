@@ -65,13 +65,13 @@ function Row({ definition, family, variant, tail }) {
         </div>
         <div className="note text-dim">{definition.question}</div>
       </td>
-      <td className="n-sm w-[76px] py-2 pl-3 text-right align-top text-muted">
+      <td className="n-sm w-[92px] py-2.5 pl-3 text-right align-baseline text-muted">
         <AnimatedNumber value={definition.values[0]} format={(v) => percent(v, 1)} blankWidth={14} />
       </td>
-      <td className="n-sm w-[76px] py-2 pl-3 text-right align-top text-muted">
+      <td className="n-sm w-[92px] py-2.5 pl-3 text-right align-baseline text-muted">
         <AnimatedNumber value={definition.values[1]} format={(v) => percent(v, 1)} blankWidth={14} />
       </td>
-      <td className="hidden w-24 py-2.5 pl-4 align-middle sm:table-cell">
+      <td className="hidden w-[150px] py-2.5 pl-5 align-middle sm:table-cell">
         <GapBar values={definition.values} interval={interval} />
       </td>
       <td className="hidden w-[124px] py-2.5 pl-4 text-right align-baseline whitespace-nowrap sm:table-cell">
@@ -82,7 +82,7 @@ function Row({ definition, family, variant, tail }) {
           </span>
         ) : null}
       </td>
-      <td className="w-[86px] py-2.5 pl-3 text-right align-baseline">
+      <td className="w-[100px] py-2.5 pl-4 text-right align-baseline">
         <AnimatedNumber
           value={definition.gap}
           format={(v) => percent(v, 1)}
@@ -95,22 +95,15 @@ function Row({ definition, family, variant, tail }) {
 }
 
 function rowsFor(definitions) {
-  let lastFamily = null
   return definitions.map((d) => {
-    if (!d.group) {
-      lastFamily = null
-      return { d, family: d.name, variant: null }
-    }
     const [family, variant] = d.name.split(', ')
-    const repeated = family === lastFamily
-    lastFamily = family
-    return { d, family: repeated ? null : family, variant: variant ?? d.question }
+    return { d, family, variant: variant ?? null }
   })
 }
 
 function ColumnHead({ name, color }) {
   return (
-    <th scope="col" className="w-[76px] pb-2.5 pl-3 align-bottom font-medium">
+    <th scope="col" className="w-[92px] pb-2.5 pl-3 align-bottom font-medium">
       <div className="flex min-h-7 flex-col items-end justify-end gap-1">
         <span className="swatch" style={{ background: color }} />
         <span className="label text-right leading-[13px] normal-case tracking-normal">{name}</span>
@@ -181,13 +174,13 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
             <th className="label pb-2.5 pr-4 text-left font-medium text-ink">Definition</th>
             <ColumnHead name={groupNames[0]} color="var(--color-groupA)" />
             <ColumnHead name={groupNames[1]} color="var(--color-groupB)" />
-            <th className="label hidden w-24 pb-2.5 pl-4 text-left font-medium sm:table-cell">
+            <th className="label hidden w-[150px] pb-2.5 pl-5 text-left font-medium sm:table-cell">
               <span className="sr-only">Gap direction</span>
             </th>
             <th className="label hidden w-[124px] pb-2.5 pl-4 text-right font-medium sm:table-cell">
               95% interval
             </th>
-            <th className="label w-[86px] pb-2.5 pl-3 text-right font-medium text-ink">Gap</th>
+            <th className="label w-[100px] pb-2.5 pl-4 text-right font-medium text-ink">Gap</th>
           </tr>
         </thead>
         <tbody>

@@ -2,11 +2,11 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { histogram } from '../ml/metrics.js'
 import GroupTag from './GroupTag.jsx'
 
-const BINS = 24
+const BINS = 22
 const W = 100
 const HALF = 72
 const H = HALF * 2
-const DIM = 0.22
+const DIM = 0.34
 const TICKS = [0, 0.25, 0.5, 0.75, 1]
 
 function density(counts) {
@@ -17,7 +17,7 @@ function density(counts) {
 function Bars({ series, peak, up, lit }) {
   const width = W / BINS
   return series.map((value, i) => {
-    const h = peak === 0 ? 0 : (value / peak) * HALF
+    const h = peak === 0 ? 0 : Math.sqrt(value / peak) * HALF
     if (h <= 0) return null
     return (
       <rect
@@ -96,13 +96,13 @@ export default function ScoreDistribution({
     : [{ group: 0, value: thresholds[0], color: 'var(--color-ink)', up: null }]
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-1 flex-col">
       <div className="mb-3 flex items-center gap-5">
         <GroupTag name={`${groupNames[0]} above`} color="var(--color-groupA)" />
         <GroupTag name={`${groupNames[1]} below`} color="var(--color-groupB)" />
       </div>
 
-      <div ref={boxRef} className="relative h-[152px] touch-none select-none">
+      <div ref={boxRef} className="relative min-h-[132px] flex-1 touch-none select-none">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
