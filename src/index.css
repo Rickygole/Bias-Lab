@@ -65,6 +65,32 @@
   :focus:not(:focus-visible) {
     outline: none;
   }
+
+  .scroller {
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-edge) transparent;
+  }
+
+  .scroller::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .scroller::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scroller::-webkit-scrollbar-thumb {
+    background: var(--color-edge);
+    border: 3px solid transparent;
+    border-radius: 5px;
+    background-clip: content-box;
+  }
+
+  .scroller::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted);
+    background-clip: content-box;
+  }
 }
 
 @layer components {
