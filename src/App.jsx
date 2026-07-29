@@ -165,11 +165,11 @@ export default function App() {
         />
 
         <main className="flex flex-1 flex-col lg:min-h-0">
-          <div className="scroller grid min-w-0 flex-1 auto-rows-min grid-cols-1 content-start gap-4 px-4 py-4 sm:px-6 lg:min-h-0 lg:grid-cols-12 lg:overflow-y-auto lg:px-5">
+          <div className="scroller grid min-w-0 flex-1 auto-rows-min grid-cols-1 content-start gap-4 px-4 py-3.5 sm:px-6 lg:min-h-0 lg:grid-cols-12 lg:overflow-y-auto lg:px-5">
             <Panel
               title="Score distributions"
               note="drag the line"
-              className="lg:order-1 lg:col-span-7"
+              className="lg:order-1 lg:col-span-5"
               footer="Everything to the right of the line is approved. Each group is drawn as a share of itself, on a square root height scale, so the two shapes can be compared."
             >
               <ScoreDistribution
@@ -186,7 +186,7 @@ export default function App() {
               title="Outcomes by group"
               note="test set counts"
               footer={groupAccuracy}
-              className="order-3 lg:order-2 lg:col-span-5"
+              className="order-3 lg:order-2 lg:col-span-4"
             >
               <ConfusionMatrices
                 matrices={derived?.matrices}
@@ -198,7 +198,7 @@ export default function App() {
             <Panel
               title="Fairness definitions"
               note="all six at once, on purpose"
-              className="order-1 lg:order-4 lg:col-span-7"
+              className="order-1 lg:order-4 lg:col-span-12"
             >
               <FairnessTable
                 definitions={derived?.definitions ?? EMPTY}
@@ -208,16 +208,15 @@ export default function App() {
             </Panel>
 
             <Panel
-              title="Human cost"
-              note="per hundred"
+              title="What this costs people"
               footer={
                 costSpread === null
-                  ? 'Filled squares are people who qualified and were turned away anyway.'
+                  ? 'Each square is one person in a hundred. Filled squares are people who qualified and were turned away anyway.'
                   : Math.abs(costSpread) < 0.005
-                    ? 'Both groups are turned away at about the same rate right now.'
-                    : `${groupNames[worse]} are turned away ${points(Math.abs(costSpread), 1)} points more often than ${groupNames[1 - worse]}.`
+                    ? 'Each square is one person in a hundred. Both groups are turned away at about the same rate right now.'
+                    : `Each square is one person in a hundred. ${groupNames[worse]} are turned away ${points(Math.abs(costSpread), 1)} points more often than ${groupNames[1 - worse]}.`
               }
-              className="order-2 lg:order-3 lg:col-span-5"
+              className="order-2 lg:order-3 lg:col-span-3"
             >
               <HumanCost
                 costs={derived?.costs}

@@ -3,12 +3,12 @@ import { count, percent } from '../lib/format.js'
 
 function Cell({ value, share, harm }) {
   return (
-    <td className="py-2.5 pl-4 align-baseline">
+    <td className="py-2 pl-4 align-baseline">
       <div className="flex items-baseline justify-end gap-2">
         <AnimatedNumber
           value={value}
           format={count}
-          className={`n-md ${harm ? 'text-ink' : 'text-dim'}`}
+          className={`n-md ${harm ? 'text-ink' : 'text-muted'}`}
           blankWidth={16}
         />
         <span className="n-xs w-7 shrink-0 text-right text-dim">{percent(share, 0)}</span>
@@ -27,7 +27,7 @@ function Block({ matrix, name, color, outcomes, first }) {
         <th
           scope="colgroup"
           colSpan={3}
-          className={`pb-2 text-left font-normal ${first ? 'pt-0' : 'pt-4'}`}
+          className={`pb-2 text-left font-normal ${first ? 'pt-0' : 'pt-3'}`}
         >
           <span className="flex items-center gap-2">
             <span className="swatch" style={{ background: color }} />
@@ -36,14 +36,14 @@ function Block({ matrix, name, color, outcomes, first }) {
         </th>
       </tr>
       <tr className="border-t border-hair">
-        <th scope="row" className="note py-2.5 pr-2 text-left font-normal whitespace-nowrap text-muted">
+        <th scope="row" className="note py-2 pr-2 text-left font-normal whitespace-nowrap text-muted">
           {outcomes.actual[0]}
         </th>
         <Cell value={matrix?.tp ?? null} share={share('tp')} />
         <Cell value={matrix?.fn ?? null} share={share('fn')} harm />
       </tr>
       <tr className="border-t border-hair">
-        <th scope="row" className="note py-2.5 pr-2 text-left font-normal whitespace-nowrap text-muted">
+        <th scope="row" className="note py-2 pr-2 text-left font-normal whitespace-nowrap text-muted">
           {outcomes.actual[1]}
         </th>
         <Cell value={matrix?.fp ?? null} share={share('fp')} harm />
