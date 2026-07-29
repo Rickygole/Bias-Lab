@@ -169,7 +169,7 @@ export default function App() {
             <Panel
               title="Score distributions"
               note="drag the line"
-              className="lg:order-1 lg:col-span-5"
+              className="lg:order-1 lg:col-span-7"
               footer="Everything to the right of the line is approved. Each group is scaled to its own size, so the shapes can be compared."
             >
               <ScoreDistribution
@@ -186,7 +186,7 @@ export default function App() {
               title="Outcomes by group"
               note="test set counts"
               footer={groupAccuracy}
-              className="order-3 lg:order-2 lg:col-span-4"
+              className="order-3 lg:order-2 lg:col-span-5"
             >
               <ConfusionMatrices
                 matrices={derived?.matrices}
@@ -198,7 +198,7 @@ export default function App() {
             <Panel
               title="Fairness definitions"
               note="all six at once, on purpose"
-              className="order-1 lg:order-4 lg:col-span-12"
+              className="order-1 lg:order-4 lg:col-span-7"
             >
               <FairnessTable
                 definitions={derived?.definitions ?? EMPTY}
@@ -208,7 +208,7 @@ export default function App() {
             </Panel>
 
             <Panel
-              title="What this costs people"
+              title="Human cost"
               note="one square, one person in a hundred"
               footer={
                 costSpread === null
@@ -217,7 +217,7 @@ export default function App() {
                     ? 'Both groups are turned away at about the same rate right now.'
                     : `${groupNames[worse]} are turned away ${points(Math.abs(costSpread), 1)} points more often than ${groupNames[1 - worse]}.`
               }
-              className="order-2 lg:order-3 lg:col-span-3"
+              className="order-2 lg:order-3 lg:col-span-5"
             >
               <HumanCost
                 costs={derived?.costs}
