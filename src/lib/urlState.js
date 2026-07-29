@@ -31,6 +31,19 @@ export function readUrlState(search) {
   return state
 }
 
+const SEEN = 'bias-lab-tour-seen'
+
+export function shouldOpenTour(search, storage) {
+  if (new URLSearchParams(search).toString() !== '') return false
+  try {
+    if (storage?.getItem(SEEN)) return false
+    storage?.setItem(SEEN, '1')
+  } catch {
+    return true
+  }
+  return true
+}
+
 export function writeUrlState({ datasetId, thresholds, splitMode }) {
   const params = new URLSearchParams()
   params.set('dataset', datasetId)

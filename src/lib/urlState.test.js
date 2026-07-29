@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { readUrlState, writeUrlState } from './urlState.js'
+import { readUrlState, shouldOpenTour, writeUrlState } from './urlState.js'
 
 describe('readUrlState', () => {
   it('is empty for no query', () => {
@@ -71,5 +71,38 @@ describe('writeUrlState', () => {
       thresholds: [0.6, 0.35],
       splitMode: true,
     })
+  })
+})
+
+describe('shouldOpenTour', () => {
+  const store = () => {
+    const map = new Map()
+    return { getItem: (k) => map.get(k) ?? null, setItem: (k, v) => map.set(k, v) }
+  }
+
+  it('opens on a clean first visit', () => {
+    expect(shouldOpenTour('', store())).toBe(true)
+  })
+
+  it('does not open twice in the same session', () => {
+    const s = store()
+    expect(shouldOpenTour('', s)).toBe(true)
+    expect(shouldOpenTour('', s)).toBe(false)
+  })
+
+  it('never interrupts a shared link', () => {
+    expect(shouldOpenTour('?dataset=medical&t=0.65', store())).toBe(false)
+    expect(shouldOpenTour('?t=0.45', store())).toBe(false)
+  })
+
+  it('opens when storage is unavailable rather than failing', () => {
+    const hostile = {
+      getItem: () => {
+        throw new Error('blocked')
+      },
+      setItem: () => {},
+    }
+    expect(shouldOpenTour('', hostile)).toBe(true)
+    expect(shouldOpenTour('', undefined)).toBe(true)
   })
 })
