@@ -9,7 +9,7 @@ export default function Panel({ title, note, footer, children, className = '' })
       <div className="scroller flex min-w-0 flex-1 flex-col overflow-x-auto pt-4">{children}</div>
 
       {footer ? (
-        <p className="note mt-3.5 border-t border-hair pt-3 text-muted">{footer}</p>
+        <p className="note mt-3.5 min-h-8 border-t border-hair pt-3 text-muted">{footer}</p>
       ) : null}
     </section>
   )

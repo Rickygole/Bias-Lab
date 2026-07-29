@@ -1,4 +1,5 @@
 import AnimatedNumber from './AnimatedNumber.jsx'
+import Blank from './Blank.jsx'
 import { count, percent } from '../lib/format.js'
 
 function Cell({ value, share, harm }) {
@@ -11,7 +12,9 @@ function Cell({ value, share, harm }) {
           className={`n-md ${harm ? 'text-ink' : 'text-muted'}`}
           blankWidth={16}
         />
-        <span className="n-xs w-7 shrink-0 text-right text-dim">{percent(share, 0)}</span>
+        <span className="n-xs w-7 shrink-0 text-right text-dim">
+          {share === null || share === undefined ? <Blank width={12} /> : percent(share, 0)}
+        </span>
       </div>
     </td>
   )

@@ -16,7 +16,7 @@ const modeOptions = [
 
 function Card({ title, note, children, className = '' }) {
   return (
-    <section className={`plate px-4 pt-3.5 pb-4 ${className}`}>
+    <section className={`plate px-4 pt-3 pb-3.5 ${className}`}>
       <header className="flex items-baseline justify-between gap-3 border-b border-edge pb-2.5">
         <h2 className="label text-ink">{title}</h2>
         {note ? <span className="note text-dim">{note}</span> : null}
@@ -92,7 +92,7 @@ function DatasetCard({ datasetId, dataset }) {
 
   return (
     <Card
-      title={dataset?.source === 'real' ? 'Real data' : 'Synthetic data'}
+      title={dataset ? (dataset.source === 'real' ? 'Real data' : 'Synthetic data') : 'Dataset'}
       note={dataset?.groupAttribute}
     >
       <p className="read">{card.short}</p>
@@ -170,7 +170,7 @@ function CompositionCard({ composition, groupNames, qualifiedLabel }) {
       <p className="note mt-3.5 border-t border-hair pt-3 text-muted">
         {spread === null
           ? 'These are the base rates. Their difference drives everything below.'
-          : `The base rates differ by ${points(spread, 1)} points. When they do, no imperfect model can be calibrated and have equal error rates at the same time. That is the wall you are about to hit.`}
+          : `Base rates differ by ${points(spread, 1)} points. When they do, no imperfect model can be calibrated and have equal error rates at once. That is the wall.`}
       </p>
     </Card>
   )
@@ -224,22 +224,13 @@ export default function LeftRail({
   const qualifiedLabel = dataset?.qualifiedLabel ?? 'qualify'
 
   return (
-    <aside className="scroller order-last flex w-full shrink-0 flex-col gap-4 border-edge px-6 py-4 lg:order-none lg:w-[340px] lg:overflow-y-auto lg:border-r lg:px-5">
+    <aside className="scroller order-last flex w-full shrink-0 flex-col gap-3 border-edge px-6 py-4 lg:order-none lg:w-[340px] lg:overflow-y-auto lg:border-r lg:px-5">
       <DatasetCard datasetId={datasetId} dataset={dataset} />
 
       <CompositionCard
         composition={composition}
         groupNames={groupNames}
         qualifiedLabel={qualifiedLabel}
-      />
-
-      <ModelCard
-        status={status}
-        epoch={epoch}
-        epochs={epochs}
-        history={history}
-        accuracy={accuracy}
-        auc={auc}
       />
 
       <Card title="Decision" note="the only control">
@@ -291,6 +282,15 @@ export default function LeftRail({
           </p>
         </div>
       </Card>
+
+      <ModelCard
+        status={status}
+        epoch={epoch}
+        epochs={epochs}
+        history={history}
+        accuracy={accuracy}
+        auc={auc}
+      />
 
       <div className="mt-auto hidden pt-2 lg:block">
         <p className="note text-dim">Six definitions, one threshold. You cannot satisfy them all.</p>

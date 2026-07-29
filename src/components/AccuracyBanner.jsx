@@ -65,7 +65,7 @@ export default function AccuracyBanner({ accuracy, largestGap, hollow, groupName
           turning almost everyone away is the cheapest kind there is.
         </p>
       ) : (
-        <p className="note max-w-[52ch] pb-1.5 text-muted">
+        <p className="note hidden max-w-[52ch] pb-1.5 text-muted sm:block">
           {accuracy === null
             ? 'Fitting the model on the training split.'
             : drift === null

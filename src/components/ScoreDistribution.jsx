@@ -5,7 +5,7 @@ import GroupTag from './GroupTag.jsx'
 const BINS = 22
 const W = 100
 const HALF = 72
-const GUTTER = 5
+const GUTTER = 11
 const H = HALF * 2 + GUTTER
 const DIM = 0.34
 const TICKS = [0, 0.25, 0.5, 0.75, 1]
@@ -98,7 +98,7 @@ export default function ScoreDistribution({
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="mb-3 flex items-center gap-5">
+      <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-6">
         <GroupTag name={`${groupNames[0]} above`} color="var(--color-groupA)" />
         <GroupTag name={`${groupNames[1]} below`} color="var(--color-groupB)" />
       </div>
