@@ -5,13 +5,13 @@ const options = datasetIds.map((id) => ({ value: id, label: datasetNames[id] }))
 
 export default function TopBar({ datasetId, onSelect, onReset, onTour }) {
   return (
-    <header className="flex shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-edge px-6 py-3 lg:h-14 lg:flex-nowrap lg:py-0 lg:pr-5 lg:pl-5">
+    <header className="flex w-full min-w-0 shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-edge px-4 py-3 sm:px-6 lg:h-14 lg:flex-nowrap lg:py-0 lg:pr-5 lg:pl-5">
       <div className="flex items-baseline gap-3">
         <h1 className="tracking-[-0.01em] font-medium">Bias Lab</h1>
         <span className="note hidden text-dim sm:inline">one threshold, two outcomes</span>
       </div>
 
-      <nav className="order-3 w-full lg:order-none lg:w-auto">
+      <nav className="scroller order-3 w-full min-w-0 max-w-full overflow-x-auto lg:order-none lg:w-auto">
         <Segmented label="Dataset" options={options} value={datasetId} onChange={onSelect} />
       </nav>
 

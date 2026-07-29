@@ -3,7 +3,7 @@ export default function Segmented({ label, options, value, onChange, vertical = 
     <div
       role="group"
       aria-label={label}
-      className={`flex rounded-[3px] border border-edge ${vertical ? 'flex-col' : 'flex-wrap'}`}
+      className={`flex rounded-[3px] border border-edge ${vertical ? 'flex-col' : 'w-max min-w-full lg:w-auto lg:min-w-0'}`}
     >
       {options.map((option, i) => {
         const selected = option.value === value
