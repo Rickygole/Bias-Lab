@@ -4,6 +4,8 @@ Train a classifier, drag one threshold, watch who absorbs the error.
 
 **Live: https://rickygole.github.io/Bias-Lab/**
 
+![Bias Lab on the loan dataset, threshold at 0.45](docs/screenshots/01-loan-overview.png)
+
 Bias Lab is a browser app where a student trains a real classifier on real data, then drags one
 decision threshold and watches error move between two groups while overall accuracy stays put.
 

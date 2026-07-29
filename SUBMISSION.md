@@ -143,3 +143,16 @@ Watch what the others do."
 
 Do not narrate the whole interface. The single job of this video is that the viewer watches the
 accuracy number hold still while the human numbers move.
+
+## Screenshots
+
+Captured and committed under `docs/screenshots`. Upload in this order, because the first is what
+appears in the Devpost gallery listing.
+
+1. `01-loan-overview.png` — the whole instrument on the loan dataset at threshold 0.45.
+2. `02-medical.png` — the medical dataset. The synthetic data marker is in frame on the left, which
+   is deliberate and should not be cropped out.
+3. `03-admissions.png` — the admissions dataset, showing proxy discrimination.
+4. `04-separate.png` — separate thresholds per group.
+5. `05-tour.png` — the guided tour docked at the bottom, reading the live accuracy.
+6. `06-mobile.png` — the phone layout.
