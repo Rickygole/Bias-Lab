@@ -10,7 +10,7 @@ import LeftRail from './components/LeftRail.jsx'
 import Panel from './components/Panel.jsx'
 import ScoreDistribution from './components/ScoreDistribution.jsx'
 import ConfusionMatrices from './components/ConfusionMatrices.jsx'
-import FairnessTable from './components/FairnessTable.jsx'
+import FairnessTable, { hollowEquality } from './components/FairnessTable.jsx'
 import HumanCost from './components/HumanCost.jsx'
 import AccuracyBanner from './components/AccuracyBanner.jsx'
 import ThresholdBar from './components/ThresholdBar.jsx'
@@ -118,6 +118,8 @@ export default function App() {
     (group, value) => dispatch({ type: 'setThreshold', group, value }),
     [],
   )
+
+  const hollow = derived ? hollowEquality(derived.definitions, true) : null
 
   const dataset = state.dataset
   const groupNames = dataset?.groupNames ?? ['Group A', 'Group B']
@@ -240,7 +242,12 @@ export default function App() {
               onThreshold={setThreshold}
               onSplitMode={(value) => dispatch({ type: 'setSplitMode', value })}
             />
-            <AccuracyBanner accuracy={derived?.accuracy ?? null} largestGap={largestGap} />
+            <AccuracyBanner
+              accuracy={derived?.accuracy ?? null}
+              largestGap={largestGap}
+              hollow={hollow}
+              groupNames={groupNames}
+            />
           </div>
         </main>
       </div>
