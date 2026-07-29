@@ -39,7 +39,7 @@ spending tracks access rather than illness. Each ships with a plain language car
 wrong with its label before you train anything.
 
 **A logistic regression written from scratch, about sixty lines,** trained live in the browser in
-roughly two hundred milliseconds. No ML library. It is checked against scikit-learn on the identical
+roughly a quarter of a second. No ML library. It is checked against scikit-learn on the identical
 split by a committed script: worst case agreement is 6.8e-07 on predicted scores.
 
 **Six fairness definitions computed simultaneously,** never behind a tab or a dropdown: demographic
@@ -64,7 +64,7 @@ actually produces, and fails if they diverge.
 
 React, Vite, Tailwind, Web Workers, and a custom gradient descent implementation. Python with numpy,
 pandas and scikit-learn for offline dataset generation and for the parity check, run through uv.
-Vitest for 70 unit tests, including a server side render smoke test. Deployed on GitHub Pages.
+Vitest for 76 unit tests, including a server side render smoke test. Deployed on GitHub Pages.
 
 No backend, no API, no external inference, no accounts, no API key. Everything runs client side,
 including the model training, so there is nothing that can be down when you open the link. Fonts are

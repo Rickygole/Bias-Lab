@@ -33,7 +33,7 @@ describe('App renders', () => {
       'Score distributions',
       'Outcomes by group',
       'Fairness definitions',
-      'Human cost',
+      'What this costs people',
     ]) {
       expect(html).toContain(heading)
     }
