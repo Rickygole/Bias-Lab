@@ -11,6 +11,15 @@ export const initialState = {
   tourStep: null,
 }
 
+export function makeInitialState(overrides = {}) {
+  const { thresholds, ...rest } = overrides
+  return {
+    ...initialState,
+    ...rest,
+    thresholds: thresholds ?? initialState.thresholds,
+  }
+}
+
 export function appReducer(state, action) {
   switch (action.type) {
     case 'selectDataset':
