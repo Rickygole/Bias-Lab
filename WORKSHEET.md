@@ -4,6 +4,10 @@ For an instructor running this in an ethics module. Takes about twenty minutes i
 discussion. Students work in the browser at https://rickygole.github.io/Bias-Lab/ and write their
 answers down. There is nothing to install and no account to create.
 
+The state lives in the URL, so you can link students directly to a moment and they can paste back
+what they found. Part 1 starts here:
+https://rickygole.github.io/Bias-Lab/?dataset=loan&t=0.40
+
 Answers are at the bottom. They are approximate because the model is retrained in each student's
 browser, but the direction of every answer is fixed.
 
