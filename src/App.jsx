@@ -138,7 +138,7 @@ export default function App() {
   const worse = costSpread === null ? 0 : costSpread >= 0 ? 1 : 0
 
   return (
-    <div className="flex min-h-dvh flex-col lg:h-dvh">
+    <div className="flex min-h-dvh w-full max-w-full min-w-0 flex-col overflow-x-hidden lg:h-dvh">
       <TopBar
         datasetId={state.datasetId}
         onSelect={(id) => dispatch({ type: 'selectDataset', id })}
@@ -165,7 +165,7 @@ export default function App() {
         />
 
         <main className="flex flex-1 flex-col lg:min-h-0">
-          <div className="scroller grid flex-1 auto-rows-min grid-cols-1 content-start gap-4 px-6 py-4 lg:min-h-0 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:overflow-y-auto lg:px-5">
+          <div className="scroller grid min-w-0 flex-1 auto-rows-min grid-cols-1 content-start gap-4 px-4 py-4 sm:px-6 lg:min-h-0 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:overflow-y-auto lg:px-5">
             <Panel
               title="Score distributions"
               note="drag the line"
