@@ -64,7 +64,7 @@ actually produces, and fails if they diverge.
 
 React, Vite, Tailwind, Web Workers, and a custom gradient descent implementation. Python with numpy,
 pandas and scikit-learn for offline dataset generation and for the parity check, run through uv.
-Vitest for 48 unit tests. Deployed on GitHub Pages.
+Vitest for 70 unit tests, including a server side render smoke test. Deployed on GitHub Pages.
 
 No backend, no API, no external inference, no accounts, no API key. Everything runs client side,
 including the model training, so there is nothing that can be down when you open the link. Fonts are
@@ -83,7 +83,8 @@ Students finishing an introductory AI curriculum, and the instructors teaching t
 
 It was built for the ML Empowerment Build Challenge and it slots directly into the ethics module of
 the challenge's own curriculum. It runs from one link, needs no setup and no accounts, and takes
-about ten minutes. Any instructor running that module is welcome to use it as is.
+about ten minutes. It has not been classroom tested. WORKSHEET.md in the repository is a fifteen question worksheet
+with an answer key for anyone who wants to try it.
 
 ---
 
@@ -99,13 +100,8 @@ about ten minutes. Any instructor running that module is welcome to use it as is
 
 **Team:** solo.
 
-**Screenshots to capture** (at least one is required, and the first should be the top of the page):
-
-1. The full 2x2 grid mid interaction, threshold around 0.45 on the loan dataset, with visible gaps.
-2. The fairness table close up, showing all six definitions and at least one gap marked not certain.
-3. The human cost panel with both dot grids, showing the difference between groups.
-4. The separate thresholds mode with the two coloured sliders.
-5. Tour step 6, the impossibility statement.
+**Screenshots:** already captured and committed under `docs/screenshots`. See the list at the
+bottom of this file for the upload order.
 
 **Prize tracks, in order of realistic odds:** Data Driven Insights (this is literally what the
 project is, and the field will be thin). Best Use of Machine Learning (the from scratch plus parity
@@ -149,10 +145,10 @@ accuracy number hold still while the human numbers move.
 Captured and committed under `docs/screenshots`. Upload in this order, because the first is what
 appears in the Devpost gallery listing.
 
-1. `01-loan-overview.png` , the whole instrument on the loan dataset at threshold 0.45.
-2. `02-medical.png` , the medical dataset. The synthetic data marker is in frame on the left, which
-   is deliberate and should not be cropped out.
-3. `03-admissions.png` , the admissions dataset, showing proxy discrimination.
-4. `04-separate.png` , separate thresholds per group.
-5. `05-tour.png` , the guided tour docked at the bottom, reading the live accuracy.
-6. `06-mobile.png` , the phone layout.
+1. `01-loan-overview.png` is the whole instrument on the loan dataset at threshold 0.45.
+2. `02-medical.png` is the medical dataset. The synthetic data marker sits in frame on the left,
+   which is deliberate and should not be cropped out.
+3. `03-admissions.png` is the admissions dataset, showing proxy discrimination.
+4. `04-separate.png` is separate thresholds per group.
+5. `05-tour.png` is the guided tour docked at the bottom, reading the live accuracy.
+6. `06-mobile.png` is the phone layout.
