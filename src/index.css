@@ -41,3 +41,40 @@ body {
   text-transform: uppercase;
   color: var(--color-muted);
 }
+
+@keyframes draw-in {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-edge);
+}
+
+input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  margin-top: -7px;
+  height: 17px;
+  width: 17px;
+  border-radius: 50%;
+  background: currentColor;
+  border: 3px solid var(--color-panel);
+  box-shadow: 0 0 0 1px var(--color-edge);
+}
+
+input[type='range']::-moz-range-track {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-edge);
+}
+
+input[type='range']::-moz-range-thumb {
+  height: 17px;
+  width: 17px;
+  border: 3px solid var(--color-panel);
+  border-radius: 50%;
+  background: currentColor;
+}
