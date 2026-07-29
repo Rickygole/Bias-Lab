@@ -38,12 +38,12 @@ FPR = (p / (1 - p)) * ((1 - PPV) / PPV) * (1 - FNR)
 
 If two groups have different base rates `p`, you cannot have equal PPV, equal FNR and equal FPR at
 the same time. Fix any two and the identity forces the third apart. This is Chouldechova (2017).
-Kleinberg, Mullainathan and Raghavan (2016) prove the same incompatibility for calibration against
-equalised odds. It holds regardless of how good your model is or how carefully you collected your
-data.
+Kleinberg, Mullainathan and Raghavan (2016) prove a companion result in score space: calibration
+within groups is incompatible with balance for the positive class and balance for the negative
+class, which are the score level analogues of equalised odds rather than equalised odds themselves.
 
 There are exactly two escape hatches: equal base rates, or perfect prediction. Neither is available
-in the real world.
+in the real world, and no amount of care in collecting the data creates either one.
 
 So the student's task is not to find the fair threshold. It is to understand that they are choosing
 which unfairness to accept, and on whose behalf.
@@ -54,8 +54,16 @@ You can check this against the shipped data rather than taking it on faith:
 uv run data/audit.py
 ```
 
-It searches every threshold pair on a grid, under a realistic selection floor, and reports the best
-achievable worst gap. On these three datasets it is 0.085, 0.066 and 0.101. No setting closes them.
+It searches every threshold pair on a grid and reports the best achievable worst gap among true
+positive rate, false positive rate and predictive parity. Under a stated floor requiring each group
+to receive at least 10 percent of the positive decisions, that number is 0.085, 0.066 and 0.101.
+
+The floor is doing real work and it is worth being explicit about why. Without it you can drive
+every gap under 5 percent, and the app will let you: on the medical dataset, separate thresholds at
+0.72 and 0.67 do it. You get there by approving 10 percent of one group and 5 percent of the other,
+turning away almost everyone who qualifies. Equality bought that way is not a counterexample to the
+theorem, it is the degenerate corner the theorem allows, and it is a real failure mode in deployed
+systems. The app names it when you reach it rather than letting the numbers look like a win.
 
 ## Running it locally
 
@@ -132,12 +140,15 @@ Everything is client side. No backend, no API key, no external inference, nothin
 when you open the link. Fonts are self hosted. The datasets are code split, so a first visit
 downloads one rather than three.
 
-Threshold changes recompute every confusion matrix in a single pass over the test set, measured at
-about 0.02 milliseconds. There is no debounce anywhere near the slider, on purpose. Cause and effect
-have to feel connected or the lesson dies.
+Threshold changes recompute both confusion matrices and every metric in a handful of linear passes
+over the test set, measured between 0.016 and 0.036 milliseconds depending on the dataset. There is
+no debounce anywhere near the slider, on purpose. Cause and effect have to feel connected or the
+lesson dies.
 
-Gaps carry Agresti-Caffo confidence intervals. Where the interval crosses zero the gap is marked not
-certain rather than reported as fact.
+The five threshold dependent gaps carry Agresti-Caffo confidence intervals. Where the interval
+crosses zero the gap is marked not certain rather than reported as fact. Calibration does not carry
+one, because it is a property of the scores rather than of a decision rule and it does not move when
+you drag.
 
 ## Limitations
 
@@ -147,6 +158,9 @@ Stated plainly, because this tool is easy to over-read.
   important fairness failures often appear at intersections this tool cannot represent.
 - Binary outcomes only. No regression, no ranking, no multi class.
 - No intersectionality. You cannot ask about first generation students who are also low income.
+- The intervals are nominal. A student who hunts for the smallest gap across a hundred threshold
+  settings and then reads its 95 percent interval is doing post-selection inference, and the stated
+  coverage does not hold there. The tool does not correct for this and neither do most real audits.
 - The test sets run to a few hundred people per group. Some gaps genuinely cannot be distinguished
   from zero at that size, which is why the intervals are shown, but it also means this is a smaller
   evidence base than any real audit would accept.
@@ -169,11 +183,12 @@ What is different here, and why it was worth building:
 
 - Six definitions on screen simultaneously rather than one at a time. Seeing them trade against each
   other is the entire lesson, and it does not survive a dropdown.
-- Per group thresholds, so the student can try to equalise one criterion exactly and find that the
-  others will not follow.
-- Confidence intervals on every gap, with small gaps marked not certain. None of the tools above
-  show sampling uncertainty on a fairness metric, and it is the most common way a real audit goes
-  wrong.
+- Sampling uncertainty shown inline on the threshold dependent gaps, with gaps that cannot be
+  distinguished from zero marked not certain. Aequitas offers significance testing for
+  practitioners; what is unusual here is putting the interval next to the number in a teaching tool,
+  where the temptation to over-read a gap is highest.
+- A named warning when the student reaches equality by approving almost nobody, which is the
+  degenerate corner every threshold explorable contains and none of them point at.
 - The student trains the model. It is not precomputed. The weights come from gradient descent that
   ran in their browser, on a split they can inspect.
 - Three datasets whose labels are broken in three different documented ways, with a committed audit
