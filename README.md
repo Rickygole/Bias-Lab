@@ -71,6 +71,21 @@ npm run parity    # check the hand written model against scikit-learn
 uv run data/audit.py
 ```
 
+## Linking to a specific moment
+
+The dataset, the threshold and the mode all live in the URL, so an instructor can send a student
+straight to the state being discussed and a student can send back what they found.
+
+```
+?dataset=medical&t=0.65
+?dataset=loan&split=1&a=0.62&b=0.44
+?dataset=loan&t=0.45&tour=1
+```
+
+`t` sets one threshold for both groups. `split=1` with `a` and `b` sets a different threshold per
+group. `tour=1` opens the guided tour. Values outside 0 to 1 are clamped and anything unparseable is
+ignored, so a mangled link degrades to the default rather than breaking.
+
 ## The three datasets
 
 Every dataset ships with a card explaining where it came from, what each feature means, and what is
