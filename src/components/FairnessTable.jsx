@@ -53,19 +53,17 @@ function Row({ definition, family, variant, tail }) {
 
   return (
     <tr className={tail ? '' : 'border-b border-hair'}>
-      <td className="py-2.5 pr-6 align-baseline">
-        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5">
-          <span className="w-[210px] shrink-0 leading-[19px]">
-            {family ? <span className="font-medium text-ink">{family}</span> : null}
-            {variant ? (
-              <span className={family ? 'text-muted' : 'pl-[6.5rem] text-muted'}>
-                {family ? ' ' : ''}
-                {variant}
-              </span>
-            ) : null}
-          </span>
-          <span className="note text-dim">{definition.question}</span>
+      <td className="py-2.5 pr-4 align-top">
+        <div className="leading-[19px]">
+          {family ? <span className="font-medium text-ink">{family}</span> : null}
+          {variant ? (
+            <span className={family ? 'text-muted' : 'pl-4 text-muted'}>
+              {family ? ', ' : ''}
+              {variant}
+            </span>
+          ) : null}
         </div>
+        <div className="note text-dim">{definition.question}</div>
       </td>
       <td className="n-sm w-[76px] py-2 pl-3 text-right align-top text-muted">
         <AnimatedNumber value={definition.values[0]} format={(v) => percent(v, 1)} blankWidth={14} />
