@@ -1,6 +1,6 @@
 import AnimatedNumber from './AnimatedNumber.jsx'
 import Pending from './Pending.jsx'
-import { count, percent } from '../lib/format.js'
+import { count, percent, points } from '../lib/format.js'
 
 function DotGrid({ fraction, color }) {
   const filled = Math.round((fraction ?? 0) * 100)
@@ -55,20 +55,31 @@ export default function HumanCost({ costs, groupNames, qualifiedLabel }) {
     )
   }
 
+  const spread = costs[1].missRate - costs[0].missRate
+  const worse = spread >= 0 ? 1 : 0
+
   return (
-    <div className="flex h-full gap-6">
-      <Side
-        cost={costs[0]}
-        name={groupNames[0]}
-        color="var(--color-groupA)"
-        qualifiedLabel={qualifiedLabel}
-      />
-      <Side
-        cost={costs[1]}
-        name={groupNames[1]}
-        color="var(--color-groupB)"
-        qualifiedLabel={qualifiedLabel}
-      />
+    <div className="flex h-full flex-col">
+      <div className="flex gap-6">
+        <Side
+          cost={costs[0]}
+          name={groupNames[0]}
+          color="var(--color-groupA)"
+          qualifiedLabel={qualifiedLabel}
+        />
+        <Side
+          cost={costs[1]}
+          name={groupNames[1]}
+          color="var(--color-groupB)"
+          qualifiedLabel={qualifiedLabel}
+        />
+      </div>
+
+      <p className="mt-auto border-t border-edge pt-3 leading-relaxed">
+        {Math.abs(spread) < 0.005
+          ? 'Both groups are turned away at about the same rate right now.'
+          : `${groupNames[worse]} are denied ${points(Math.abs(spread), 1)} points more often than ${groupNames[1 - worse]}.`}
+      </p>
     </div>
   )
 }

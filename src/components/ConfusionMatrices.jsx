@@ -13,12 +13,12 @@ function Matrix({ matrix, name, color }) {
   const peak = Math.max(matrix.tp, matrix.fp, matrix.fn, matrix.tn, 1)
 
   return (
-    <div className="min-w-0 flex-1">
+    <div className="flex min-w-0 flex-1 flex-col">
       <div className="mb-4 flex items-center gap-2">
         <span className="h-2 w-2 rounded-[1px]" style={{ background: color }} />
         <span className="text-[11px] text-muted">{name}</span>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid flex-1 grid-cols-2 grid-rows-2 gap-2">
         {CELLS.map((cell) => {
           const value = matrix[cell.key]
           const weight = value / peak
@@ -26,16 +26,18 @@ function Matrix({ matrix, name, color }) {
           return (
             <div
               key={cell.key}
-              className="rounded-[3px] border border-edge p-2 transition-colors duration-200"
+              className="flex min-h-[76px] flex-col justify-between rounded-[3px] border border-edge px-3 py-2.5 transition-colors duration-200"
               style={{ background: `rgba(${tint}, ${0.05 + weight * 0.16})` }}
             >
-              <AnimatedNumber
-                value={value}
-                format={count}
-                className="num block text-[20px] leading-none"
-              />
-              <div className="num mt-2 text-[11px] text-muted">
-                {percent(matrix.n === 0 ? null : value / matrix.n, 0)}
+              <div className="flex items-baseline gap-2">
+                <AnimatedNumber
+                  value={value}
+                  format={count}
+                  className="num text-[20px] leading-none"
+                />
+                <span className="num text-[11px] text-muted">
+                  {percent(matrix.n === 0 ? null : value / matrix.n, 0)}
+                </span>
               </div>
               <div className="mt-2 text-[11px] leading-tight text-muted">{cell.label}</div>
             </div>
