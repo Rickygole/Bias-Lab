@@ -1,30 +1,27 @@
 # Bias Lab
 
-An interactive lab where students train a real classifier in their browser and watch a single
-threshold decision quietly redistribute harm between groups while overall accuracy barely moves.
+Train a classifier, drag one threshold, watch who absorbs the error.
 
 **Live: https://rickygole.github.io/Bias-Lab/**
+
+Bias Lab is a browser app where a student trains a real classifier on real data, then drags one
+decision threshold and watches error move between two groups while overall accuracy stays put.
+
+On the loan dataset, moving the threshold from 0.40 to 0.60 changes overall accuracy by two tenths
+of a percentage point. Over that same range, qualified women denied a loan goes from 21 to 33 and
+qualified men denied goes from 102 to 167. The demographic parity gap closes by 6.8 points while the
+equal opportunity gap opens by 4.8. The accuracy number does not move. The people do.
+
+Six fairness definitions stay on screen at once, because that is the only way to see that they
+cannot all be satisfied at once.
 
 ## The problem
 
 Students finishing an introductory AI course can recite that AI can be biased. Almost none of them
 have watched it happen. A fairness failure does not look like a crash or a bad accuracy number, it
-looks like 84 percent accuracy and a footnote nobody reads. Until you have seen the gap open up in
-front of you, you cannot recognise it in your own work.
-
-## What this does
-
-Pick one of three datasets. Train a logistic regression, which happens in the browser in about two
-hundred milliseconds. Then drag the decision threshold.
-
-Overall accuracy barely moves. On the loan dataset, going from 0.40 to 0.60 changes it by two tenths
-of a point. Over that same drag the demographic parity gap moves nearly seven points, and the number
-of qualified women denied a loan goes from 21 to 33 while the number of qualified men denied goes
-from 102 to 167.
-
-Six fairness definitions stay on screen the whole time. That is deliberate, and it is the most
-important decision in the design. If you can only see one at a time you will conclude that fairness
-is achievable, and the entire lesson is lost.
+looks like 84 percent accuracy and a footnote nobody reads. On this data the model approves men at
+more than three times the rate it approves women, and reports 84 percent accuracy while doing it.
+Until you have seen that gap open in front of you, you cannot recognise it in your own work.
 
 ## The impossibility result
 

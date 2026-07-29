@@ -70,9 +70,12 @@ No backend, no API, no external inference, no accounts, no API key. Everything r
 including the model training, so there is nothing that can be down when you open the link. Fonts are
 self hosted. First load is about 180 KB.
 
-There is deliberately no large language model in this project. The model is trained in the browser
-from scratch on real data, and the project is about interrogating machine learning rather than
-calling somebody else's API.
+There is no large language model in this project, and that is a decision rather than a gap. An LLM
+would explain fairness to the student. This tool makes the student produce the evidence: train a
+real classifier, move a real threshold, and watch a real number change on a test set they can
+inspect. The model is trained live in the browser by hand written gradient descent, verified against
+scikit-learn to within 6.8e-07. The lesson only holds if the student did the training and dragged
+the slider, so that is the one step it does not hand off.
 
 ## Target Users
 
@@ -104,5 +107,14 @@ about ten minutes. Any instructor running that module is welcome to use it as is
 4. The separate thresholds mode with the two coloured sliders.
 5. Tour step 6, the impossibility statement.
 
-**Prize tracks this fits:** AI for Education, Best Use of Machine Learning, Best Web AI App, Most
-Impactful, Data Driven Insights.
+**Prize tracks, in order of realistic odds:** Data Driven Insights (this is literally what the
+project is, and the field will be thin). Best Use of Machine Learning (the from scratch plus parity
+check story is unusually verifiable). AI for Education. Best Overall is genuinely in play.
+
+Do not chase Most Impactful, which at social good hackathons goes to projects with a nameable
+beneficiary, or Most Innovative, where the Google PAIR prior art is a liability rather than an
+asset. The prior work is acknowledged in the README along with the specific deltas.
+
+**Screenshot warning:** shots 2 and 3 render a racial health disparity as large numbers. Frame them
+so the left rail is in the picture, because that is where the synthetic data marker lives. A cropped
+screenshot of that panel with no context is how a teaching tool ends up quoted as a finding.
