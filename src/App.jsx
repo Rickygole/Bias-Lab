@@ -74,7 +74,7 @@ export default function App() {
     return {
       ...result,
       costs: humanCost(result.matrices, result.rates),
-      accuracy: overallAccuracy(state.scores, y, state.thresholds, g),
+      accuracy: overallAccuracy(state.scores, y, g, state.thresholds),
     }
   }, [state.scores, state.dataset, state.thresholds])
 
