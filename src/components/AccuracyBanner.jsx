@@ -8,7 +8,7 @@ function Stat({ value, format, label, className = '' }) {
       <AnimatedNumber
         value={value}
         format={format}
-        className={`num text-[40px] leading-[40px] tracking-tight transition-colors duration-500 ${className}`}
+        className={`num text-[36px] leading-[36px] tracking-tight transition-colors duration-500 ${className}`}
       />
       <span className="label">{label}</span>
     </div>
@@ -38,9 +38,9 @@ export default function AccuracyBanner({ accuracy, largestGap }) {
   const striking = drift !== null && drift.gap > 0.05 && drift.accuracy < drift.gap / 3
 
   return (
-    <div className="sticky bottom-0 z-10 flex shrink-0 flex-wrap items-end gap-x-10 gap-y-4 border-t border-edge bg-bg px-6 py-5 lg:static">
+    <div className="sticky bottom-0 z-10 flex shrink-0 flex-wrap items-end gap-x-10 gap-y-4 border-t border-edge bg-bg px-6 py-4 lg:static">
       {accuracy === null ? (
-        <div className="flex h-[60px] flex-col justify-end gap-1">
+        <div className="flex h-[56px] flex-col justify-end gap-1">
           <span className="label">Overall accuracy</span>
           <span className="text-[11px] text-muted">Fitting the model on the training split</span>
         </div>
