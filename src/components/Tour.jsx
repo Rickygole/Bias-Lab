@@ -16,7 +16,7 @@ export const steps = [
   },
   {
     body: () =>
-      'Now switch to separate thresholds. You can equalize one definition almost exactly. You still cannot equalize them all.',
+      'Now switch to separate thresholds. You can close every gap at once, and the app will tell you when you have. Read what it says, because how you got there is the lesson.',
   },
   {
     body: () =>
