@@ -356,3 +356,23 @@ describe('humanCost', () => {
     expect(cost[0].total).toBe(5)
   })
 })
+
+describe('question wording', () => {
+  it('defaults to approval language', () => {
+    const r = fairness(scores, labels, groups, [0.5, 0.5])
+    expect(r.definitions[0].question).toBe('Is the same share of each group approved?')
+  })
+
+  it('takes the verbs the dataset supplies', () => {
+    const r = fairness(scores, labels, groups, [0.5, 0.5], {
+      picked: 'flagged',
+      qualify: 'are actually sick',
+    })
+    const byKey = Object.fromEntries(r.definitions.map((d) => [d.key, d]))
+    expect(byKey.demographicParity.question).toBe('Is the same share of each group flagged?')
+    expect(byKey.equalOpportunity.question).toBe(
+      'Among those who are actually sick, is the same share flagged?',
+    )
+    expect(byKey.predictiveParity.question).toBe('Among those flagged, is the same share correct?')
+  })
+})

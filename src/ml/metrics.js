@@ -199,7 +199,9 @@ export function differenceInterval(countA, totalA, countB, totalB) {
   }
 }
 
-export function fairness(scores, labels, groups, thresholds) {
+export function fairness(scores, labels, groups, thresholds, verbs = {}) {
+  const picked = verbs.picked ?? 'approved'
+  const qualify = verbs.qualify ?? 'qualify'
   const matrixA = confusion(scores, labels, groups, 0, thresholds[0])
   const matrixB = confusion(scores, labels, groups, 1, thresholds[1])
   const a = rates(matrixA)
@@ -219,7 +221,7 @@ export function fairness(scores, labels, groups, thresholds) {
       {
         key: 'demographicParity',
         name: 'Demographic parity',
-        question: 'Is the same share of each group approved?',
+        question: `Is the same share of each group ${picked}?`,
         live: true,
         values: [a.selectionRate, b.selectionRate],
         gap: gap(a.selectionRate, b.selectionRate),
@@ -228,7 +230,7 @@ export function fairness(scores, labels, groups, thresholds) {
       {
         key: 'equalOpportunity',
         name: 'Equal opportunity',
-        question: 'Among those who qualify, is the same share approved?',
+        question: `Among those who ${qualify}, is the same share ${picked}?`,
         live: true,
         values: [a.tpr, b.tpr],
         gap: gap(a.tpr, b.tpr),
@@ -257,7 +259,7 @@ export function fairness(scores, labels, groups, thresholds) {
       {
         key: 'predictiveParity',
         name: 'Predictive parity',
-        question: 'Among those approved, is the same share correct?',
+        question: `Among those ${picked}, is the same share correct?`,
         live: true,
         values: [a.ppv, b.ppv],
         gap: gap(a.ppv, b.ppv),
