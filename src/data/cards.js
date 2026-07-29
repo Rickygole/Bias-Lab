@@ -1,3 +1,18 @@
+export const outcomes = {
+  loan: {
+    predicted: ['Approved', 'Denied'],
+    actual: ['Would repay', 'Would not repay'],
+  },
+  admissions: {
+    predicted: ['Admitted', 'Rejected'],
+    actual: ['Would succeed', 'Would not succeed'],
+  },
+  medical: {
+    predicted: ['Flagged', 'Not flagged'],
+    actual: ['Actually sick', 'Not sick'],
+  },
+}
+
 export const cards = {
   loan: {
     short:

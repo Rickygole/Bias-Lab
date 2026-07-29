@@ -1,64 +1,92 @@
 import AnimatedNumber from './AnimatedNumber.jsx'
-import Pending from './Pending.jsx'
 import { count, percent } from '../lib/format.js'
 
-const CELLS = [
-  { key: 'tp', label: 'Approved and qualified', good: true },
-  { key: 'fp', label: 'Approved, not qualified', good: false },
-  { key: 'fn', label: 'Denied but qualified', good: false },
-  { key: 'tn', label: 'Denied, not qualified', good: true },
-]
-
-function Matrix({ matrix, name, color }) {
-  const peak = Math.max(matrix.tp, matrix.fp, matrix.fn, matrix.tn, 1)
-
+function Cell({ value, share, harm }) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col">
-      <div className="mb-4 flex items-center gap-2">
-        <span className="h-2 w-2 rounded-[1px]" style={{ background: color }} />
-        <span className="text-[11px] text-muted">{name}</span>
+    <td className="w-[38%] py-2 pl-4 align-top">
+      <div className="flex items-baseline justify-end gap-2">
+        <AnimatedNumber value={value} format={count} className="n-md text-ink" blankWidth={16} />
+        <span className="n-xs w-7 text-right text-dim">{percent(share, 0)}</span>
       </div>
-      <div className="grid flex-1 grid-cols-2 grid-rows-2 gap-2">
-        {CELLS.map((cell) => {
-          const value = matrix[cell.key]
-          const weight = value / peak
-          const tint = cell.good ? '61, 214, 140' : '255, 92, 92'
-          return (
-            <div
-              key={cell.key}
-              className="flex min-h-[76px] flex-col justify-between rounded-[3px] border border-edge px-3 py-2.5 transition-colors duration-200"
-              style={{ background: `rgba(${tint}, ${0.05 + weight * 0.16})` }}
-            >
-              <div className="flex items-baseline gap-2">
-                <AnimatedNumber
-                  value={value}
-                  format={count}
-                  className="num text-[20px] leading-none"
-                />
-                <span className="num text-[11px] text-muted">
-                  {percent(matrix.n === 0 ? null : value / matrix.n, 0)}
-                </span>
-              </div>
-              <div className="mt-2 text-[11px] leading-tight text-muted">{cell.label}</div>
-            </div>
-          )
-        })}
+      <div className="mt-1.5 h-px w-full bg-hair">
+        <div
+          className="h-px transition-[width] duration-200 ease-out"
+          style={{
+            width: `${Math.min(1, share ?? 0) * 100}%`,
+            background: harm ? 'var(--color-bad)' : 'var(--color-dim)',
+          }}
+        />
       </div>
-    </div>
+    </td>
   )
 }
 
-export default function ConfusionMatrices({ matrices, groupNames }) {
-  if (!matrices) {
-    return (
-      <Pending>Four outcomes per group, counted on the test set.</Pending>
-    )
-  }
+function Block({ matrix, name, color, outcomes, first }) {
+  const n = matrix?.n ?? 0
+  const share = (key) => (matrix && n > 0 ? matrix[key] / n : null)
 
   return (
-    <div className="flex h-full gap-6">
-      <Matrix matrix={matrices[0]} name={groupNames[0]} color="var(--color-groupA)" />
-      <Matrix matrix={matrices[1]} name={groupNames[1]} color="var(--color-groupB)" />
-    </div>
+    <tbody>
+      <tr>
+        <th
+          scope="colgroup"
+          colSpan={3}
+          className={`pb-2 text-left font-normal ${first ? 'pt-0' : 'pt-4'}`}
+        >
+          <span className="flex items-center gap-2">
+            <span className="swatch" style={{ background: color }} />
+            <span className="note text-ink">{name}</span>
+          </span>
+        </th>
+      </tr>
+      <tr className="border-t border-hair">
+        <th scope="row" className="note py-2 pr-2 text-left font-normal text-muted">
+          {outcomes.actual[0]}
+        </th>
+        <Cell value={matrix?.tp ?? null} share={share('tp')} />
+        <Cell value={matrix?.fn ?? null} share={share('fn')} harm />
+      </tr>
+      <tr className="border-t border-hair">
+        <th scope="row" className="note py-2 pr-2 text-left font-normal text-muted">
+          {outcomes.actual[1]}
+        </th>
+        <Cell value={matrix?.fp ?? null} share={share('fp')} harm />
+        <Cell value={matrix?.tn ?? null} share={share('tn')} />
+      </tr>
+    </tbody>
+  )
+}
+
+export default function ConfusionMatrices({ matrices, groupNames, outcomes }) {
+  return (
+    <table className="w-full border-collapse">
+      <caption className="sr-only">
+        Counts of each outcome for both groups at the current threshold
+      </caption>
+      <thead>
+        <tr className="border-b border-edge">
+          <th className="label pb-2 text-left font-medium">Outcome</th>
+          <th className="label w-[38%] pb-2 pl-4 text-right font-medium text-ink">
+            {outcomes.predicted[0]}
+          </th>
+          <th className="label w-[38%] pb-2 pl-4 text-right font-medium text-ink">
+            {outcomes.predicted[1]}
+          </th>
+        </tr>
+      </thead>
+      <Block
+        first
+        matrix={matrices?.[0] ?? null}
+        name={groupNames[0]}
+        color="var(--color-groupA)"
+        outcomes={outcomes}
+      />
+      <Block
+        matrix={matrices?.[1] ?? null}
+        name={groupNames[1]}
+        color="var(--color-groupB)"
+        outcomes={outcomes}
+      />
+    </table>
   )
 }
