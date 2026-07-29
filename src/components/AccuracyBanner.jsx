@@ -19,7 +19,7 @@ function Stat({ value, format, label, unit, className = '' }) {
   )
 }
 
-export default function AccuracyBanner({ accuracy, largestGap }) {
+export default function AccuracyBanner({ accuracy, largestGap, hollow, groupNames }) {
   const baseline = useRef(null)
   const [drift, setDrift] = useState(null)
 
@@ -55,15 +55,24 @@ export default function AccuracyBanner({ accuracy, largestGap }) {
         format={(v) => points(v, 1)}
         unit="pts"
         label="Largest group gap"
-        className="text-ink"
+        className={hollow ? 'text-bad' : 'text-ink'}
       />
-      <p className="note max-w-[52ch] pb-1.5 text-muted">
-        {accuracy === null
-          ? 'Fitting the model on the training split.'
-          : drift === null
-            ? 'Move the threshold and watch these two numbers pull against each other.'
-            : `Since you started, accuracy has moved ${points(drift.accuracy, 1)} points and the largest gap has moved ${points(drift.gap, 1)}.${striking ? ' The gap has moved much further than accuracy.' : ''}`}
-      </p>
+      {hollow ? (
+        <p className="max-w-[62ch] pb-1 leading-[21px] text-ink">
+          Every gap is small because almost nobody is approved:{' '}
+          <span className="num">{percent(hollow[0], 1)}</span> of {groupNames[0]} and{' '}
+          <span className="num">{percent(hollow[1], 1)}</span> of {groupNames[1]}. Equality bought by
+          turning almost everyone away is the cheapest kind there is.
+        </p>
+      ) : (
+        <p className="note max-w-[52ch] pb-1.5 text-muted">
+          {accuracy === null
+            ? 'Fitting the model on the training split.'
+            : drift === null
+              ? 'Move the threshold and watch these two numbers pull against each other.'
+              : `Since you started, accuracy has moved ${points(drift.accuracy, 1)} points and the largest gap has moved ${points(drift.gap, 1)}.${striking ? ' The gap has moved much further than accuracy.' : ''}`}
+        </p>
+      )}
     </div>
   )
 }
