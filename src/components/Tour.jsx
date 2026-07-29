@@ -1,34 +1,35 @@
 import { useEffect, useRef } from 'react'
+import { percent } from '../lib/format.js'
 
 export const steps = [
   {
-    body: 'This model is about 84 percent accurate. That number is real. Watch what it hides.',
-    needs: 'trained',
+    body: (accuracy) =>
+      `This model is ${accuracy === null ? 'about 84 percent' : percent(accuracy, 1)} accurate. That number is real. Watch what it hides.`,
   },
   {
-    body: 'Drag the threshold. Watch the overall accuracy at the bottom. Now watch how many qualified people in each group get denied.',
-    needs: 'trained',
+    body: () =>
+      'Drag the threshold. Watch the overall accuracy at the bottom. Now watch how many qualified people in each group get turned away.',
   },
   {
-    body: 'Try to make demographic parity zero. You can get close. Look at what equal opportunity does while you do it.',
-    needs: 'trained',
+    body: () =>
+      'Try to make demographic parity zero. You can get close. Look at what equal opportunity does while you do it.',
   },
   {
-    body: 'Now switch to separate thresholds. You can equalize one definition almost exactly. You still cannot equalize them all.',
-    needs: 'trained',
+    body: () =>
+      'Now switch to separate thresholds. You can equalize one definition almost exactly. You still cannot equalize them all.',
   },
   {
-    body: 'Watch the intervals while you do it. A gap marked not certain is one this test set is too small to measure, not one that has gone away. Fairness auditing runs into this constantly.',
-    needs: 'trained',
+    body: () =>
+      'Watch the intervals while you do it. A gap marked not certain is one this test set is too small to measure, not one that has gone away. Fairness auditing runs into this constantly.',
   },
   {
-    body: 'This is the impossibility result. When base rates differ, calibration and equalized odds cannot both hold. You are not choosing whether to be unfair. You are choosing who absorbs it.',
-    needs: 'trained',
+    body: () =>
+      'This is the impossibility result. When base rates differ, calibration and equalized odds cannot both hold. You are not choosing whether to be unfair. You are choosing who absorbs it.',
   },
 ]
 
-export default function Tour({ step, onStep, onClose }) {
-  const cardRef = useRef(null)
+export default function Tour({ step, accuracy, onStep, onClose }) {
+  const ref = useRef(null)
   const closeRef = useRef(onClose)
   closeRef.current = onClose
   const open = step !== null
@@ -36,7 +37,7 @@ export default function Tour({ step, onStep, onClose }) {
   useEffect(() => {
     if (!open) return undefined
     const opener = document.activeElement
-    cardRef.current?.focus()
+    ref.current?.focus()
     const onKeyDown = (event) => {
       if (event.key === 'Escape') closeRef.current()
     }
@@ -49,67 +50,59 @@ export default function Tour({ step, onStep, onClose }) {
 
   if (!open) return null
 
-  const current = steps[step]
   const last = step === steps.length - 1
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center px-6 pb-28">
-      <div
-        ref={cardRef}
-        role="dialog"
-        aria-label="Guided tour"
-        tabIndex={-1}
-        className="pointer-events-auto w-full max-w-xl rounded-md border border-edge bg-panel p-6 shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
-      >
-        <div className="mb-4 flex items-baseline justify-between gap-4">
-          <span className="label">
-            Step <span className="num">{step + 1}</span> of{' '}
-            <span className="num">{steps.length}</span>
-          </span>
+    <section
+      ref={ref}
+      tabIndex={-1}
+      aria-label="Guided tour"
+      className="flex flex-col gap-3 border-t border-edge bg-panel px-6 py-4 outline-none lg:flex-row lg:items-center lg:gap-8 lg:px-5"
+    >
+      <div className="flex shrink-0 items-center gap-3">
+        <span className="label text-dim">
+          Step <span className="num">{step + 1}</span> of <span className="num">{steps.length}</span>
+        </span>
+        <span className="flex gap-1" aria-hidden="true">
+          {steps.map((_, i) => (
+            <span
+              key={i}
+              className="h-[2px] w-4 transition-colors duration-200"
+              style={{ background: i <= step ? 'var(--color-ink)' : 'var(--color-edge)' }}
+            />
+          ))}
+        </span>
+      </div>
+
+      <p aria-live="polite" className="min-w-0 flex-1 leading-[21px]">
+        {steps[step].body(accuracy)}
+      </p>
+
+      <div className="flex shrink-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          className="note rounded-[2px] px-2 py-2 text-dim transition-colors duration-150 hover:text-ink"
+        >
+          Dismiss
+        </button>
+        {step > 0 ? (
           <button
             type="button"
-            onClick={onClose}
-            className="rounded-[2px] text-[11px] text-muted transition-colors duration-150 hover:text-ink"
+            onClick={() => onStep(step - 1)}
+            className="rounded-[3px] border border-edge px-4 py-2 text-muted transition-colors duration-150 hover:border-dim hover:text-ink"
           >
-            Dismiss
+            Back
           </button>
-        </div>
-
-        <p aria-live="polite" className="leading-relaxed">
-          {current.body}
-        </p>
-
-        <div className="mt-6 flex items-center justify-between gap-4">
-          <div className="flex gap-2" aria-hidden="true">
-            {steps.map((_, i) => (
-              <span
-                key={i}
-                className="h-[2px] w-6 rounded-full transition-colors duration-200"
-                style={{ background: i <= step ? 'var(--color-ink)' : 'var(--color-edge)' }}
-              />
-            ))}
-          </div>
-
-          <div className="flex gap-2">
-            {step > 0 ? (
-              <button
-                type="button"
-                onClick={() => onStep(step - 1)}
-                className="rounded-[4px] border border-edge px-4 py-2 text-muted transition-colors duration-150 hover:text-ink"
-              >
-                Back
-              </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => (last ? onClose() : onStep(step + 1))}
-              className="rounded-[4px] border border-edge bg-edge px-4 py-2 transition-colors duration-150 hover:border-muted"
-            >
-              {last ? 'Done' : 'Next'}
-            </button>
-          </div>
-        </div>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => (last ? onClose() : onStep(step + 1))}
+          className="rounded-[3px] border border-dim bg-edge px-4 py-2 text-ink transition-colors duration-150 hover:border-muted"
+        >
+          {last ? 'Done' : 'Next'}
+        </button>
       </div>
-    </div>
+    </section>
   )
 }
