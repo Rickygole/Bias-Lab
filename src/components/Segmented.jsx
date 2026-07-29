@@ -3,9 +3,9 @@ export default function Segmented({ label, options, value, onChange, vertical = 
     <div
       role="group"
       aria-label={label}
-      className={`flex rounded-md border border-edge p-1 ${vertical ? 'flex-col' : 'flex-wrap'}`}
+      className={`flex rounded-[3px] border border-edge ${vertical ? 'flex-col' : 'flex-wrap'}`}
     >
-      {options.map((option) => {
+      {options.map((option, i) => {
         const selected = option.value === value
         return (
           <button
@@ -13,9 +13,11 @@ export default function Segmented({ label, options, value, onChange, vertical = 
             type="button"
             aria-pressed={selected}
             onClick={() => onChange(option.value)}
-            className={`rounded-[4px] px-3 py-2 whitespace-nowrap transition-colors duration-150 ${
-              vertical ? 'text-left' : ''
-            } ${selected ? 'bg-edge text-ink' : 'text-muted hover:text-ink'}`}
+            className={`px-3 py-2 whitespace-nowrap transition-colors duration-150 ${
+              i === 0 ? '' : vertical ? 'border-t border-hair' : 'border-l border-hair'
+            } ${vertical ? 'text-left' : ''} ${
+              selected ? 'bg-edge text-ink' : 'text-muted hover:text-ink'
+            }`}
           >
             {option.label}
           </button>
