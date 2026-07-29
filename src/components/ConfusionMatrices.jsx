@@ -1,4 +1,5 @@
 import AnimatedNumber from './AnimatedNumber.jsx'
+import EmptyState from './EmptyState.jsx'
 import { count, percent } from '../lib/format.js'
 
 const CELLS = [
@@ -13,11 +14,11 @@ function Matrix({ matrix, name, color }) {
 
   return (
     <div className="min-w-0 flex-1">
-      <div className="mb-2 flex items-center gap-2">
+      <div className="mb-4 flex items-center gap-2">
         <span className="h-2 w-2 rounded-[1px]" style={{ background: color }} />
         <span className="text-[11px] text-muted">{name}</span>
       </div>
-      <div className="grid grid-cols-2 gap-1">
+      <div className="grid grid-cols-2 gap-2">
         {CELLS.map((cell) => {
           const value = matrix[cell.key]
           const weight = value / peak
@@ -25,18 +26,18 @@ function Matrix({ matrix, name, color }) {
           return (
             <div
               key={cell.key}
-              className="rounded-[3px] border border-edge px-2 py-2 transition-colors duration-200"
+              className="rounded-[3px] border border-edge p-2 transition-colors duration-200"
               style={{ background: `rgba(${tint}, ${0.05 + weight * 0.16})` }}
             >
               <AnimatedNumber
                 value={value}
                 format={count}
-                className="num block text-[16px] leading-tight"
+                className="num block text-[20px] leading-none"
               />
-              <div className="num text-[11px] text-muted">
+              <div className="num mt-2 text-[11px] text-muted">
                 {percent(matrix.n === 0 ? null : value / matrix.n, 0)}
               </div>
-              <div className="mt-1 text-[10px] leading-tight text-muted">{cell.label}</div>
+              <div className="mt-2 text-[11px] leading-tight text-muted">{cell.label}</div>
             </div>
           )
         })}
@@ -48,14 +49,15 @@ function Matrix({ matrix, name, color }) {
 export default function ConfusionMatrices({ matrices, groupNames }) {
   if (!matrices) {
     return (
-      <div className="flex h-full items-center justify-center text-[13px] text-muted">
-        Train the model to see the per group outcomes.
-      </div>
+      <EmptyState>
+        Four outcomes per group, counted on the test set. The two error cells carry a red tint and
+        say plainly what the error was.
+      </EmptyState>
     )
   }
 
   return (
-    <div className="flex h-full gap-4">
+    <div className="flex h-full gap-6">
       <Matrix matrix={matrices[0]} name={groupNames[0]} color="var(--color-groupA)" />
       <Matrix matrix={matrices[1]} name={groupNames[1]} color="var(--color-groupB)" />
     </div>

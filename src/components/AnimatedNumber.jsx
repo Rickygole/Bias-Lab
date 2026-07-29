@@ -7,6 +7,13 @@ function easeOut(t) {
   return 1 - Math.pow(1 - t, 3)
 }
 
+function prefersReducedMotion() {
+  return (
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
+  )
+}
+
 export default function AnimatedNumber({ value, format, className = '' }) {
   const [shown, setShown] = useState(value)
   const frame = useRef(0)
@@ -19,7 +26,7 @@ export default function AnimatedNumber({ value, format, className = '' }) {
     }
 
     const start = from.current
-    if (!Number.isFinite(start) || Math.abs(value - start) < SNAP_BELOW) {
+    if (!Number.isFinite(start) || Math.abs(value - start) < SNAP_BELOW || prefersReducedMotion()) {
       from.current = value
       setShown(value)
       return undefined

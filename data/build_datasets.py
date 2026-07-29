@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 SEED = 20260729
-ROWS = 3000
+ROWS = 5000
 TEST_FRACTION = 0.30
 PRECISION = 3
 
@@ -44,22 +44,32 @@ def download_adult() -> Path:
     return path
 
 
-def standardise(frame: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    frame = frame.copy()
-    for column in columns:
-        values = frame[column].astype(float)
-        spread = values.std()
-        frame[column] = (values - values.mean()) / (spread if spread > 0 else 1.0)
-    return frame
+def split_and_pack(
+    features: pd.DataFrame,
+    labels: np.ndarray,
+    groups: np.ndarray,
+    numeric: list[str],
+) -> dict:
+    """Splits first, then standardises using training statistics only.
 
-
-def split_and_pack(features: pd.DataFrame, labels: np.ndarray, groups: np.ndarray) -> dict:
+    Fitting the scaler on the full frame would leak test data into the
+    preprocessing. It makes no difference to the scikit-learn parity check,
+    since both sides would see the same matrix, but it is still wrong and it is
+    the first thing a reviewer looks for.
+    """
     rng = np.random.default_rng(SEED)
     order = rng.permutation(len(features))
     cut = int(len(features) * (1 - TEST_FRACTION))
     train_idx, test_idx = order[:cut], order[cut:]
 
-    matrix = np.round(features.to_numpy(dtype=float), PRECISION)
+    scaled = features.copy()
+    for column in numeric:
+        values = features[column].astype(float)
+        centre = values.iloc[train_idx].mean()
+        spread = values.iloc[train_idx].std()
+        scaled[column] = (values - centre) / (spread if spread > 0 else 1.0)
+
+    matrix = np.round(scaled.to_numpy(dtype=float), PRECISION)
 
     def pack(idx):
         return {
@@ -75,9 +85,15 @@ def summarise(name: str, labels: np.ndarray, groups: np.ndarray, group_names: li
     overall = labels.mean()
     a = labels[groups == 0].mean()
     b = labels[groups == 1].mean()
+    test_positives = [
+        int((labels[groups == g][int(len(labels[groups == g]) * (1 - TEST_FRACTION)) :]).sum())
+        for g in (0, 1)
+    ]
     print(
         f"{name}: n={len(labels)} base rate {overall:.3f} "
-        f"| {group_names[0]} {a:.3f} | {group_names[1]} {b:.3f} | gap {abs(a - b):.3f}"
+        f"| {group_names[0]} {a:.3f} | {group_names[1]} {b:.3f} | gap {abs(a - b):.3f} "
+        f"| ratio {max(a, b) / max(min(a, b), 1e-9):.2f}x "
+        f"| approx test positives {test_positives[0]}/{test_positives[1]}"
     )
 
 
@@ -120,7 +136,7 @@ def build_loan() -> dict:
         "married", "never_married", "white_collar", "manual",
         "self_employed", "government", "has_capital_gain",
     ]
-    features = standardise(frame[numeric + binary], numeric)
+    features = frame[numeric + binary]
 
     labels = frame["approved"].to_numpy()
     groups = frame["group"].to_numpy()
@@ -140,7 +156,7 @@ def build_loan() -> dict:
         "positiveLabel": "Approved",
         "negativeLabel": "Denied",
         "qualifiedLabel": "would repay",
-        **split_and_pack(features, labels, groups),
+        **split_and_pack(features, labels, groups, numeric),
     }
 
 
@@ -151,10 +167,10 @@ def build_admissions() -> dict:
     first_gen = rng.binomial(1, 0.34, n)
 
     ap_offered = np.clip(
-        rng.normal(np.where(first_gen == 1, 5.0, 13.0), 3.2, n).round(), 0, 25
+        rng.normal(np.where(first_gen == 1, 8.2, 12.0), 5.0, n).round(), 0, 25
     )
     counselor_ratio = np.clip(
-        rng.normal(np.where(first_gen == 1, 480, 260), 90, n), 90, 900
+        rng.normal(np.where(first_gen == 1, 400, 300), 150, n), 90, 900
     )
 
     ability = rng.normal(0, 1, n)
@@ -192,7 +208,7 @@ def build_admissions() -> dict:
         "recommendation": recommendation,
     })
     numeric = list(frame.columns)
-    features = standardise(frame, numeric).round(PRECISION)
+    features = frame
 
     summarise("admissions", admitted, first_gen, ["Continuing generation", "First generation"])
 
@@ -210,7 +226,7 @@ def build_admissions() -> dict:
         "positiveLabel": "Admitted",
         "negativeLabel": "Rejected",
         "qualifiedLabel": "would succeed",
-        **split_and_pack(features, admitted, first_gen),
+        **split_and_pack(features, admitted, first_gen, numeric),
     }
 
 
@@ -220,7 +236,7 @@ def build_medical() -> dict:
 
     group = rng.binomial(1, 0.31, n)
 
-    illness = np.clip(rng.gamma(2.4, 1.0, n) + 0.22 * group, 0, None)
+    illness = np.clip(rng.gamma(2.4, 1.0, n), 0, None)
 
     age = np.clip(rng.normal(58 + 2.4 * illness, 12, n), 18, 95)
     conditions = np.clip(rng.poisson(0.55 * illness + 0.7, n), 0, 12)
@@ -228,11 +244,11 @@ def build_medical() -> dict:
     systolic = np.clip(rng.normal(124 + 2.9 * illness, 15, n), 85, 205)
     medications = np.clip(rng.poisson(0.75 * illness + 1.0, n), 0, 20)
 
-    access = np.where(group == 1, 0.62, 1.0)
+    access = np.where(group == 1, 0.80, 1.0)
     visits = np.clip(rng.poisson(np.clip(access * (1.15 * illness + 1.0), 0.05, None), n), 0, 30)
 
-    last_year_cost = np.clip(access * (2400 * illness + rng.normal(2600, 2200, n)), 120, None)
-    next_year_cost = np.clip(access * (2400 * illness + rng.normal(2600, 2200, n)), 120, None)
+    last_year_cost = np.clip(access * (2400 * illness + rng.normal(2600, 3400, n)), 120, None)
+    next_year_cost = np.clip(access * (2400 * illness + rng.normal(2600, 3400, n)), 120, None)
 
     prior_cost = last_year_cost
     high_risk = (next_year_cost > np.quantile(next_year_cost, 0.74)).astype(int)
@@ -247,7 +263,7 @@ def build_medical() -> dict:
         "prior_cost": prior_cost,
     })
     numeric = list(frame.columns)
-    features = standardise(frame, numeric).round(PRECISION)
+    features = frame
 
     summarise("medical", high_risk, group, ["White patients", "Black patients"])
 
@@ -264,7 +280,7 @@ def build_medical() -> dict:
         "positiveLabel": "Flagged high risk",
         "negativeLabel": "Not flagged",
         "qualifiedLabel": "is actually sick",
-        **split_and_pack(features, high_risk, group),
+        **split_and_pack(features, high_risk, group, numeric),
     }
 
 

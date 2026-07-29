@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import { cards } from '../data/cards.js'
 import ThresholdSlider from './ThresholdSlider.jsx'
+import Segmented from './Segmented.jsx'
 import { decimal, percent } from '../lib/format.js'
+
+const modeOptions = [
+  { value: false, label: 'Single threshold' },
+  { value: true, label: 'Separate thresholds' },
+]
 
 function LossSparkline({ history, draw }) {
   if (history.length < 2) return <div className="h-10" />
@@ -14,7 +20,7 @@ function LossSparkline({ history, draw }) {
     .join(' ')
 
   return (
-    <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-10 w-full">
+    <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-10 w-full" aria-hidden="true">
       <polyline
         points={points}
         fill="none"
@@ -40,14 +46,16 @@ function DatasetCard({ datasetId, dataset }) {
   const card = cards[datasetId]
 
   return (
-    <div className="rounded-md border border-edge p-4">
-      <div className="label mb-2">{dataset?.source === 'real' ? 'Real data' : 'Synthetic data'}</div>
-      <p className="text-[12px] leading-snug text-muted">{card.short}</p>
+    <div className="rounded-md border border-edge bg-panel p-4">
+      <div className="label mb-2 text-ink">
+        {dataset?.source === 'real' ? 'Real data' : 'Synthetic data'}
+      </div>
+      <p className="leading-relaxed text-muted">{card.short}</p>
 
       {open ? (
-        <div className="mt-3 space-y-2 border-t border-edge pt-3">
+        <div className="mt-4 space-y-4 border-t border-edge pt-4">
           {card.full.map((paragraph, i) => (
-            <p key={i} className="text-[12px] leading-snug text-muted">
+            <p key={i} className="leading-relaxed text-muted">
               {paragraph}
             </p>
           ))}
@@ -57,7 +65,8 @@ function DatasetCard({ datasetId, dataset }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="mt-2 text-[11px] text-muted underline underline-offset-2 hover:text-ink"
+        aria-expanded={open}
+        className="mt-4 rounded-[2px] text-[11px] text-muted underline underline-offset-4 transition-colors duration-150 hover:text-ink"
       >
         {open ? 'Show less' : 'Read the full card'}
       </button>
@@ -86,12 +95,12 @@ export default function LeftRail({
     <aside className="flex w-full shrink-0 flex-col gap-4 overflow-y-auto border-edge p-6 lg:w-80 lg:border-r">
       <DatasetCard datasetId={datasetId} dataset={dataset} />
 
-      <div className="rounded-md border border-edge p-4">
+      <div className="rounded-md border border-edge bg-panel p-4">
         {status === 'trained' ? (
           <div>
-            <div className="label mb-2">Trained</div>
+            <div className="label mb-2 text-ink">Trained</div>
             <LossSparkline history={history} draw />
-            <div className="mt-2 flex justify-between text-[12px] text-muted">
+            <div className="mt-4 flex justify-between text-[11px] text-muted">
               <span>
                 Test accuracy <span className="num text-ink">{percent(accuracy, 1)}</span>
               </span>
@@ -102,24 +111,26 @@ export default function LeftRail({
           </div>
         ) : status === 'training' ? (
           <div>
-            <div className="label mb-2">Training</div>
+            <div className="label mb-2 text-ink">Training</div>
             <LossSparkline history={history} />
-            <div className="num mt-2 text-[12px] text-muted">epoch {epoch}</div>
+            <div className="mt-4 text-[11px] text-muted">
+              epoch <span className="num text-ink">{epoch}</span>
+            </div>
           </div>
         ) : (
           <button
             type="button"
             onClick={onTrain}
             disabled={status !== 'ready'}
-            className="w-full rounded-[4px] border border-edge py-2 text-[13px] transition-colors duration-150 hover:bg-edge disabled:opacity-40"
+            className="w-full rounded-[4px] bg-ink py-2 text-bg transition-colors duration-150 hover:bg-muted disabled:cursor-default disabled:bg-edge disabled:text-muted"
           >
-            Train the model
+            {status === 'ready' ? 'Train the model' : 'Loading dataset'}
           </button>
         )}
       </div>
 
       {status === 'trained' ? (
-        <div className="flex flex-col gap-4 rounded-md border border-edge p-4">
+        <div className="flex flex-col gap-4 rounded-md border border-edge bg-panel p-4">
           {splitMode ? (
             <>
               <ThresholdSlider
@@ -139,33 +150,25 @@ export default function LeftRail({
             <ThresholdSlider
               value={thresholds[0]}
               onChange={(v) => onThreshold(0, v)}
-              color="#ffffff"
-              caption={`Applicants scoring above ${decimal(thresholds[0], 2)} are ${positive}.`}
+              color="var(--color-ink)"
+              caption={
+                <>
+                  Applicants scoring above <span className="num">{decimal(thresholds[0], 2)}</span>{' '}
+                  are {positive}.
+                </>
+              }
             />
           )}
 
-          <div className="border-t border-edge pt-3">
-            <div className="flex rounded-md border border-edge p-[3px]">
-              <button
-                type="button"
-                onClick={() => onSplitMode(false)}
-                className={`flex-1 rounded-[4px] px-2 py-[6px] text-[12px] transition-colors duration-150 ${
-                  splitMode ? 'text-muted hover:text-ink' : 'bg-edge text-ink'
-                }`}
-              >
-                Single threshold
-              </button>
-              <button
-                type="button"
-                onClick={() => onSplitMode(true)}
-                className={`flex-1 rounded-[4px] px-2 py-[6px] text-[12px] transition-colors duration-150 ${
-                  splitMode ? 'bg-edge text-ink' : 'text-muted hover:text-ink'
-                }`}
-              >
-                Separate thresholds
-              </button>
-            </div>
-            <p className="mt-2 text-[11px] leading-snug text-muted">
+          <div className="border-t border-edge pt-4">
+            <Segmented
+              vertical
+              label="Threshold mode"
+              options={modeOptions}
+              value={splitMode}
+              onChange={onSplitMode}
+            />
+            <p className="mt-4 text-[11px] leading-snug text-muted">
               Setting a different bar for each group is illegal in some contexts and required for
               fairness in others.
             </p>

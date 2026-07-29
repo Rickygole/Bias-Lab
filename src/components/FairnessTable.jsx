@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import AnimatedNumber from './AnimatedNumber.jsx'
+import EmptyState from './EmptyState.jsx'
 import { percent } from '../lib/format.js'
 
 const MAX_GAP = 0.6
@@ -16,7 +17,7 @@ function GapBar({ values }) {
     <div className="relative h-4 w-full">
       <div className="absolute inset-y-0 left-1/2 w-px bg-edge" />
       <div
-        className="absolute top-1/2 h-[6px] -translate-y-1/2 rounded-[1px] transition-all duration-200"
+        className="absolute top-1/2 h-2 -translate-y-1/2 rounded-[1px] transition-all duration-200"
         style={{
           background: color,
           width: `${magnitude * 50}%`,
@@ -28,23 +29,23 @@ function GapBar({ values }) {
   )
 }
 
-function Row({ definition, dim }) {
+function Row({ definition }) {
   return (
-    <tr className={dim ? 'opacity-60' : undefined}>
-      <td className="py-2 pr-3 align-middle">
-        <div className="text-[13px] leading-tight">{definition.name}</div>
+    <tr>
+      <td className="py-2 pr-4 align-middle">
+        <div className="leading-tight">{definition.name}</div>
         <div className="text-[11px] leading-tight text-muted">{definition.question}</div>
       </td>
-      <td className="num w-20 py-2 text-right align-middle text-[13px]">
+      <td className="num w-16 py-2 text-right align-middle">
         <AnimatedNumber value={definition.values[0]} format={(v) => percent(v, 1)} />
       </td>
-      <td className="num w-20 py-2 text-right align-middle text-[13px]">
+      <td className="num w-16 py-2 text-right align-middle">
         <AnimatedNumber value={definition.values[1]} format={(v) => percent(v, 1)} />
       </td>
-      <td className="w-32 py-2 pl-4 align-middle">
+      <td className="w-24 py-2 pl-4 align-middle">
         <GapBar values={definition.values} />
       </td>
-      <td className="num w-16 py-2 pl-2 text-right align-middle text-[13px]">
+      <td className="num w-14 py-2 pl-2 text-right align-middle">
         <AnimatedNumber value={definition.gap} format={(v) => percent(v, 1)} />
       </td>
     </tr>
@@ -62,7 +63,9 @@ function useTradeSentence(definitions) {
     }
 
     const current = Object.fromEntries(
-      definitions.filter((d) => d.live && d.gap !== null).map((d) => [d.key, { gap: d.gap, name: d.name }]),
+      definitions
+        .filter((d) => d.live && d.gap !== null)
+        .map((d) => [d.key, { gap: d.gap, name: d.name }]),
     )
 
     const before = previous.current
@@ -102,9 +105,10 @@ export default function FairnessTable({ result, groupNames }) {
 
   if (!result) {
     return (
-      <div className="flex h-full items-center justify-center text-[13px] text-muted">
-        Train the model to see all four definitions at once.
-      </div>
+      <EmptyState>
+        Six definitions of fairness, every one of them visible at the same time. They will not agree
+        with each other, and that is the point.
+      </EmptyState>
     )
   }
 
@@ -116,29 +120,40 @@ export default function FairnessTable({ result, groupNames }) {
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-edge">
-            <th className="label pb-2 text-left font-normal">Definition</th>
-            <th className="label pb-2 text-right font-normal">{groupNames[0]}</th>
-            <th className="label pb-2 text-right font-normal">{groupNames[1]}</th>
-            <th className="label pb-2 pl-4 text-left font-normal">Gap</th>
-            <th className="label pb-2 pl-2 text-right font-normal" />
+            <th className="label pr-4 pb-2 text-left font-normal">Definition</th>
+            <th className="label w-16 pb-2 text-right font-normal">{groupNames[0]}</th>
+            <th className="label w-16 pb-2 text-right font-normal">{groupNames[1]}</th>
+            <th className="label w-24 pb-2 pl-4 text-left font-normal">Gap</th>
+            <th className="label w-14 pb-2 pl-2 text-right font-normal">
+              <span className="sr-only">Gap size</span>
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-edge">
           {live.map((d) => (
             <Row key={d.key} definition={d} />
           ))}
-          {stat.map((d) => (
-            <Row key={d.key} definition={d} dim />
-          ))}
         </tbody>
+        {stat.length ? (
+          <tbody className="divide-y divide-edge border-t border-edge">
+            <tr>
+              <td colSpan={5} className="label pt-4 pb-2">
+                Does not move with the threshold
+              </td>
+            </tr>
+            {stat.map((d) => (
+              <Row key={d.key} definition={d} />
+            ))}
+          </tbody>
+        ) : null}
       </table>
 
-      <p className="mt-3 text-[11px] leading-snug text-muted">
-        Calibration is a property of the scores, not of the threshold, so it does not move when you
+      <p className="mt-4 text-[11px] leading-snug text-muted">
+        Calibration is a property of the scores, not of the threshold, so it holds still while you
         drag. It is the reason the rows above cannot all reach zero at once.
       </p>
 
-      <p className="mt-auto pt-3 text-[13px] italic leading-snug text-muted">
+      <p className="mt-auto border-t border-edge pt-4 leading-relaxed">
         {sentence ?? 'Move the threshold and watch which gaps trade against each other.'}
       </p>
     </div>

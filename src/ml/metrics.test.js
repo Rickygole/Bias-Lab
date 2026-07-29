@@ -4,6 +4,8 @@ import {
   rates,
   overallAccuracy,
   expectedCalibrationError,
+  calibrationDisparity,
+  differenceInterval,
   histogram,
   rocCurve,
   fairness,
@@ -82,20 +84,20 @@ describe('rates', () => {
 
 describe('overallAccuracy', () => {
   it('counts every correct decision under one threshold', () => {
-    expect(overallAccuracy(scores, labels, [0.5, 0.5], groups)).toBeCloseTo(6 / 10, 10)
+    expect(overallAccuracy(scores, labels, groups, [0.5, 0.5])).toBeCloseTo(6 / 10, 10)
   })
 
   it('honours separate thresholds per group', () => {
-    expect(overallAccuracy(scores, labels, [0.5, 0.0], groups)).toBeCloseTo(5 / 10, 10)
+    expect(overallAccuracy(scores, labels, groups, [0.5, 0.0])).toBeCloseTo(5 / 10, 10)
   })
 })
 
 describe('expectedCalibrationError', () => {
-  it('is zero when every bin is perfectly calibrated', () => {
+  it('equals the average distance between confidence and outcome', () => {
     const s = Float32Array.from([0.05, 0.05, 0.95, 0.95])
     const y = Uint8Array.from([0, 0, 1, 1])
     const g = Uint8Array.from([0, 0, 0, 0])
-    expect(expectedCalibrationError(s, y, g, 0)).toBeLessThan(0.06)
+    expect(expectedCalibrationError(s, y, g, 0)).toBeCloseTo(0.05, 6)
   })
 
   it('is large when confidence is inverted', () => {
@@ -110,7 +112,79 @@ describe('expectedCalibrationError', () => {
   })
 })
 
+describe('calibrationDisparity', () => {
+  it('catches groups miscalibrated in opposite directions, which a difference of error magnitudes cannot', () => {
+    const n = 2000
+    const s = new Float32Array(n)
+    const y = new Uint8Array(n)
+    const g = new Uint8Array(n)
+    for (let i = 0; i < n; i++) {
+      const group = i < n / 2 ? 0 : 1
+      const within = i % (n / 2)
+      g[i] = group
+      s[i] = 0.7
+      y[i] = within < (group === 0 ? 800 : 600) ? 1 : 0
+    }
+
+    const eceA = expectedCalibrationError(s, y, g, 0)
+    const eceB = expectedCalibrationError(s, y, g, 1)
+    expect(Math.abs(eceA - eceB)).toBeLessThan(0.001)
+
+    const disparity = calibrationDisparity(s, y, g)
+    expect(disparity.worst).toBeCloseTo(0.2, 6)
+    expect(disparity.weighted).toBeCloseTo(0.2, 6)
+  })
+
+  it('is zero when both groups have the same outcome rate in every bin', () => {
+    const s = Float32Array.from([0.2, 0.2, 0.8, 0.8])
+    const y = Uint8Array.from([0, 0, 1, 1])
+    const g = Uint8Array.from([0, 1, 0, 1])
+    expect(calibrationDisparity(s, y, g).worst).toBe(0)
+  })
+
+  it('returns null when a group is missing', () => {
+    const s = Float32Array.from([0.5, 0.5])
+    const y = Uint8Array.from([1, 0])
+    const g = Uint8Array.from([0, 0])
+    expect(calibrationDisparity(s, y, g)).toBeNull()
+  })
+})
+
+describe('differenceInterval', () => {
+  it('separates a twenty point gap measured on a thousand people', () => {
+    const interval = differenceInterval(600, 1000, 400, 1000)
+    expect(interval.separated).toBe(true)
+    expect(interval.thin).toBe(false)
+  })
+
+  it('refuses to separate the identical gap measured on ten people', () => {
+    const interval = differenceInterval(6, 10, 4, 10)
+    expect(interval.separated).toBe(false)
+    expect(interval.thin).toBe(true)
+    expect(interval.smallest).toBe(10)
+  })
+
+  it('still separates a gap wide enough to survive a small sample', () => {
+    expect(differenceInterval(9, 10, 1, 10).separated).toBe(true)
+  })
+
+  it('returns null when a denominator is empty', () => {
+    expect(differenceInterval(0, 0, 5, 10)).toBeNull()
+  })
+})
+
 describe('histogram', () => {
+  it('ignores scores that are not finite', () => {
+    const counts = histogram(
+      Float32Array.from([0.5, NaN, -1, 2]),
+      Uint8Array.from([0, 0, 0, 0]),
+      0,
+      20,
+    )
+    expect(counts.reduce((a, b) => a + b, 0)).toBe(3)
+    expect(counts.length).toBe(20)
+  })
+
   it('assigns every row of a group to exactly one bin', () => {
     const counts = histogram(scores, groups, 0, 20)
     expect(counts.reduce((a, b) => a + b, 0)).toBe(5)
@@ -193,48 +267,81 @@ describe('fairness', () => {
   })
 })
 
+function overlappingFixture(n, baseRateA, baseRateB) {
+  const s = new Float32Array(n)
+  const y = new Uint8Array(n)
+  const g = new Uint8Array(n)
+
+  let seed = 7
+  const random = () => {
+    seed = (seed * 1103515245 + 12345) % 2147483648
+    return seed / 2147483648
+  }
+  const normal = () => {
+    const u = Math.max(1e-9, random())
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * random())
+  }
+
+  for (let i = 0; i < n; i++) {
+    const group = i < n / 2 ? 0 : 1
+    const positive = random() < (group === 0 ? baseRateA : baseRateB) ? 1 : 0
+    g[i] = group
+    y[i] = positive
+    s[i] = Math.min(0.999, Math.max(0.001, (positive ? 0.62 : 0.38) + normal() * 0.22))
+  }
+  return { s, y, g }
+}
+
 describe('the impossibility result', () => {
-  it('cannot equalize predictive parity and false positive rate at once when base rates differ', () => {
-    const n = 4000
-    const s = new Float32Array(n)
-    const y = new Uint8Array(n)
-    const g = new Uint8Array(n)
+  const { s, y, g } = overlappingFixture(8000, 0.6, 0.25)
 
-    let seed = 7
-    const random = () => {
-      seed = (seed * 1103515245 + 12345) % 2147483648
-      return seed / 2147483648
-    }
+  it('has genuine overlap, so the perfect prediction escape clause does not apply', () => {
+    const roc = rocCurve(s, y, g, null)
+    expect(roc.auc).toBeGreaterThan(0.6)
+    expect(roc.auc).toBeLessThan(0.95)
+  })
 
-    for (let i = 0; i < n; i++) {
-      const group = i < n / 2 ? 0 : 1
-      const baseRate = group === 0 ? 0.6 : 0.25
-      const positive = random() < baseRate ? 1 : 0
-      g[i] = group
-      y[i] = positive
-      s[i] = Math.min(0.999, Math.max(0.001, (positive ? 0.68 : 0.32) + (random() - 0.5) * 0.5))
-    }
-
-    let bestFprGap = Infinity
-    let ppvGapThere = null
+  it('cannot close true positive, false positive and predictive parity gaps together, even with separate thresholds', () => {
+    let best = 1
 
     for (let ta = 0.05; ta <= 0.95; ta += 0.01) {
       for (let tb = 0.05; tb <= 0.95; tb += 0.01) {
         const r = fairness(s, y, g, [ta, tb])
-        const fprGap = r.definitions.find((d) => d.key === 'equalizedOddsFpr').gap
-        const tprGap = r.definitions.find((d) => d.key === 'equalizedOddsTpr').gap
-        const ppvGap = r.definitions.find((d) => d.key === 'predictiveParity').gap
-        if (fprGap === null || tprGap === null || ppvGap === null) continue
-        const oddsGap = Math.max(fprGap, tprGap)
-        if (oddsGap < bestFprGap) {
-          bestFprGap = oddsGap
-          ppvGapThere = ppvGap
-        }
+        const byKey = Object.fromEntries(r.definitions.map((d) => [d.key, d]))
+        const tprGap = byKey.equalizedOddsTpr.gap
+        const fprGap = byKey.equalizedOddsFpr.gap
+        const ppvGap = byKey.predictiveParity.gap
+        if (tprGap === null || fprGap === null || ppvGap === null) continue
+
+        const selectedA = r.matrices[0].tp + r.matrices[0].fp
+        const selectedB = r.matrices[1].tp + r.matrices[1].fp
+        if (selectedA / r.matrices[0].n < 0.1 || selectedB / r.matrices[1].n < 0.1) continue
+        if (selectedA < 20 || selectedB < 20) continue
+
+        best = Math.min(best, Math.max(tprGap, fprGap, ppvGap))
       }
     }
 
-    expect(bestFprGap).toBeLessThan(0.02)
-    expect(ppvGapThere).toBeGreaterThan(0.1)
+    expect(best).toBeGreaterThan(0.05)
+  })
+
+  it('closes when base rates are equal, which is what makes base rates the cause', () => {
+    const equal = overlappingFixture(8000, 0.4, 0.4)
+    let best = 1
+
+    for (let ta = 0.3; ta <= 0.7; ta += 0.01) {
+      const r = fairness(equal.s, equal.y, equal.g, [ta, ta])
+      const byKey = Object.fromEntries(r.definitions.map((d) => [d.key, d]))
+      const gaps = [
+        byKey.equalizedOddsTpr.gap,
+        byKey.equalizedOddsFpr.gap,
+        byKey.predictiveParity.gap,
+      ]
+      if (gaps.some((v) => v === null)) continue
+      best = Math.min(best, Math.max(...gaps))
+    }
+
+    expect(best).toBeLessThan(0.05)
   })
 })
 

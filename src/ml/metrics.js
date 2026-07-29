@@ -34,7 +34,7 @@ export function rates(matrix) {
   }
 }
 
-export function overallAccuracy(scores, labels, thresholds, groups) {
+export function overallAccuracy(scores, labels, groups, thresholds) {
   let correct = 0
   for (let i = 0; i < scores.length; i++) {
     const predicted = scores[i] >= thresholds[groups[i]] ? 1 : 0
@@ -51,7 +51,8 @@ export function expectedCalibrationError(scores, labels, groups, group, bins = 1
 
   for (let i = 0; i < scores.length; i++) {
     if (groups[i] !== group) continue
-    const bin = Math.min(bins - 1, Math.floor(scores[i] * bins))
+    if (!Number.isFinite(scores[i])) continue
+    const bin = Math.min(bins - 1, Math.max(0, Math.floor(scores[i] * bins)))
     counts[bin]++
     sumScore[bin] += scores[i]
     sumLabel[bin] += labels[i]
@@ -68,6 +69,42 @@ export function expectedCalibrationError(scores, labels, groups, group, bins = 1
     error += (counts[b] / total) * Math.abs(confidence - observed)
   }
   return error
+}
+
+export function calibrationDisparity(scores, labels, groups, bins = 10) {
+  const counts = [new Array(bins).fill(0), new Array(bins).fill(0)]
+  const positives = [new Array(bins).fill(0), new Array(bins).fill(0)]
+  const totals = [0, 0]
+
+  for (let i = 0; i < scores.length; i++) {
+    const g = groups[i]
+    if (g !== 0 && g !== 1) continue
+    const bin = Math.min(bins - 1, Math.max(0, Math.floor(scores[i] * bins)))
+    counts[g][bin]++
+    positives[g][bin] += labels[i]
+    totals[g]++
+  }
+
+  if (totals[0] === 0 || totals[1] === 0) return null
+
+  let weighted = 0
+  let mass = 0
+  let worst = 0
+
+  for (let b = 0; b < bins; b++) {
+    const nA = counts[0][b]
+    const nB = counts[1][b]
+    if (nA === 0 || nB === 0) continue
+    const observedA = positives[0][b] / nA
+    const observedB = positives[1][b] / nB
+    const difference = Math.abs(observedA - observedB)
+    const share = (nA + nB) / (totals[0] + totals[1])
+    weighted += share * difference
+    mass += share
+    if (difference > worst) worst = difference
+  }
+
+  return mass === 0 ? null : { weighted: weighted / mass, worst, coverage: mass }
 }
 
 export function reliabilityCurve(scores, labels, groups, group, bins = 10) {
@@ -95,7 +132,8 @@ export function histogram(scores, groups, group, bins = 20) {
   const counts = new Array(bins).fill(0)
   for (let i = 0; i < scores.length; i++) {
     if (groups[i] !== group) continue
-    counts[Math.min(bins - 1, Math.floor(scores[i] * bins))]++
+    if (!Number.isFinite(scores[i])) continue
+    counts[Math.min(bins - 1, Math.max(0, Math.floor(scores[i] * bins)))]++
   }
   return counts
 }
@@ -137,6 +175,30 @@ function gap(a, b) {
   return a === null || b === null ? null : Math.abs(a - b)
 }
 
+const Z = 1.96
+const MIN_CELL = 20
+
+export function differenceInterval(countA, totalA, countB, totalB) {
+  if (totalA === 0 || totalB === 0) return null
+
+  const pA = (countA + 1) / (totalA + 2)
+  const pB = (countB + 1) / (totalB + 2)
+  const se = Math.sqrt(
+    (pA * (1 - pA)) / (totalA + 2) + (pB * (1 - pB)) / (totalB + 2),
+  )
+  const centre = pA - pB
+  const margin = Z * se
+
+  return {
+    margin,
+    low: Math.abs(centre) - margin,
+    high: Math.abs(centre) + margin,
+    separated: Math.abs(centre) > margin,
+    thin: Math.min(totalA, totalB) < MIN_CELL,
+    smallest: Math.min(totalA, totalB),
+  }
+}
+
 export function fairness(scores, labels, groups, thresholds) {
   const matrixA = confusion(scores, labels, groups, 0, thresholds[0])
   const matrixB = confusion(scores, labels, groups, 1, thresholds[1])
@@ -145,6 +207,10 @@ export function fairness(scores, labels, groups, thresholds) {
 
   const eceA = expectedCalibrationError(scores, labels, groups, 0)
   const eceB = expectedCalibrationError(scores, labels, groups, 1)
+  const disparity = calibrationDisparity(scores, labels, groups)
+
+  const A = matrixA
+  const B = matrixB
 
   return {
     matrices: [matrixA, matrixB],
@@ -157,6 +223,7 @@ export function fairness(scores, labels, groups, thresholds) {
         live: true,
         values: [a.selectionRate, b.selectionRate],
         gap: gap(a.selectionRate, b.selectionRate),
+        interval: differenceInterval(A.tp + A.fp, A.n, B.tp + B.fp, B.n),
       },
       {
         key: 'equalOpportunity',
@@ -165,6 +232,7 @@ export function fairness(scores, labels, groups, thresholds) {
         live: true,
         values: [a.tpr, b.tpr],
         gap: gap(a.tpr, b.tpr),
+        interval: differenceInterval(A.tp, A.tp + A.fn, B.tp, B.tp + B.fn),
       },
       {
         key: 'equalizedOddsTpr',
@@ -174,6 +242,7 @@ export function fairness(scores, labels, groups, thresholds) {
         group: 'equalizedOdds',
         values: [a.tpr, b.tpr],
         gap: gap(a.tpr, b.tpr),
+        interval: differenceInterval(A.tp, A.tp + A.fn, B.tp, B.tp + B.fn),
       },
       {
         key: 'equalizedOddsFpr',
@@ -183,6 +252,7 @@ export function fairness(scores, labels, groups, thresholds) {
         group: 'equalizedOdds',
         values: [a.fpr, b.fpr],
         gap: gap(a.fpr, b.fpr),
+        interval: differenceInterval(A.fp, A.fp + A.tn, B.fp, B.fp + B.tn),
       },
       {
         key: 'predictiveParity',
@@ -191,6 +261,7 @@ export function fairness(scores, labels, groups, thresholds) {
         live: true,
         values: [a.ppv, b.ppv],
         gap: gap(a.ppv, b.ppv),
+        interval: differenceInterval(A.tp, A.tp + A.fp, B.tp, B.tp + B.fp),
       },
       {
         key: 'calibration',
@@ -198,7 +269,9 @@ export function fairness(scores, labels, groups, thresholds) {
         question: 'Does a score of 0.7 mean 70 percent for both groups?',
         live: false,
         values: [eceA, eceB],
-        gap: gap(eceA, eceB),
+        gap: disparity === null ? null : disparity.weighted,
+        gapLabel: 'largest bin difference',
+        detail: disparity,
       },
     ],
   }

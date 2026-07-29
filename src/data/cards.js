@@ -16,7 +16,7 @@ export const cards = {
     full: [
       'This one is synthetic. The generator is committed at data/build_datasets.py, so you can read exactly how the bias was put in.',
       'Each row is an applicant. The protected attribute is whether they are the first in their family to attend college. Features are GPA, test score, essay rating, number of activities, recommendation rating, and two fields that describe the school rather than the student: how many AP courses it offers, and how many students share one counselor.',
-      'Those last two are the point. First generation students here attend schools with fewer AP courses and more crowded counseling offices. Neither field says anything about the applicant. Both are strongly correlated with first generation status, so a model that never sees the protected attribute can reconstruct it and act on it anyway. This is what proxy discrimination looks like in practice.',
+      'Those last two are the point. First generation students here attend schools with fewer AP courses and more crowded counseling offices, and AP availability also feeds into the test score, so a resource gap shows up as an ability gap. Each field correlates with first generation status at about 0.31, which is enough for a model that never sees the protected attribute to partly reconstruct it and act on it. That is what proxy discrimination looks like, and the correlation is deliberately mild, because in the real world it usually is.',
       'The label is admission, generated from a committee score that leans on AP coursework and recommendations. That is a defensible policy on its face. It is also a policy that measures the resources of a school and then calls the result student quality.',
     ],
   },
@@ -25,9 +25,9 @@ export const cards = {
     short:
       'Synthetic, modeled on the 2019 Obermeyer finding. The label is defined by spending, and spending tracks access rather than illness.',
     full: [
-      'Synthetic, modeled on a real result. In 2019 Obermeyer and colleagues audited a commercial risk algorithm applied to roughly 200 million people in the United States. It flagged Black patients at far lower rates than white patients who were equally sick. The algorithm was never given race. It was given cost.',
+      'Synthetic, modeled on a real result. In 2019 Obermeyer and colleagues audited a commercial risk algorithm and found it flagged Black patients at far lower rates than white patients who were equally sick. Algorithms of that kind are applied to around 200 million people a year in the United States. The one they audited was never given race. It was given cost.',
       'Each row here is a patient. Features are age, chronic conditions, BMI, systolic blood pressure, active medications, visits in the last year, and healthcare spending in the last year. Race is the protected attribute.',
-      'The label is a high risk flag and it is defined by spending. In the generator, patients in the disadvantaged group carry the same underlying illness but have lower access, so at any given level of sickness they produce fewer visits and smaller bills.',
+      'The label is a high risk flag and it is defined by next year spending. Illness is drawn from one distribution for both groups, so the two groups are equally sick by construction. What differs is access: at any given level of sickness, patients in the disadvantaged group produce fewer visits and smaller bills. They end up flagged at about half the rate, which is close to the ratio the paper reported.',
       'That is the whole problem. Spending is a proxy for need, and a proxy encodes who had access rather than who was sick. The label is already wrong when the model receives it. Every metric on this page is computed against that label, which means the metrics measure agreement with a biased record and not agreement with reality. No threshold fixes that.',
     ],
   },

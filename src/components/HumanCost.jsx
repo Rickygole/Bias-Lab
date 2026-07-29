@@ -1,10 +1,11 @@
 import AnimatedNumber from './AnimatedNumber.jsx'
+import EmptyState from './EmptyState.jsx'
 import { count, percent } from '../lib/format.js'
 
 function DotGrid({ fraction, color }) {
   const filled = Math.round((fraction ?? 0) * 100)
   return (
-    <div className="mt-3 grid grid-cols-20 gap-[2px]" style={{ gridTemplateColumns: 'repeat(20, minmax(0, 1fr))' }}>
+    <div className="mt-4 grid max-w-[240px] grid-cols-10 gap-[2px]" aria-hidden="true">
       {Array.from({ length: 100 }, (_, i) => (
         <span
           key={i}
@@ -19,7 +20,7 @@ function DotGrid({ fraction, color }) {
 function Side({ cost, name, color, qualifiedLabel }) {
   return (
     <div className="min-w-0 flex-1">
-      <div className="mb-2 flex items-center gap-2">
+      <div className="mb-4 flex items-center gap-2">
         <span className="h-2 w-2 rounded-[1px]" style={{ background: color }} />
         <span className="text-[11px] text-muted">{name}</span>
       </div>
@@ -28,16 +29,16 @@ function Side({ cost, name, color, qualifiedLabel }) {
         <AnimatedNumber
           value={cost.deniedButQualified}
           format={count}
-          className="num text-[28px] leading-none"
+          className="num text-[20px] leading-none"
         />
-        <span className="num text-[13px] text-muted">
+        <span className="num text-muted">
           of <AnimatedNumber value={cost.qualified} format={count} />
         </span>
       </div>
 
-      <p className="mt-1 text-[12px] leading-snug text-muted">
+      <p className="mt-2 leading-snug text-muted">
         people who {qualifiedLabel} were denied. That is{' '}
-        <span className="num">{percent(cost.missRate, 1)}</span> of them.
+        <span className="num text-ink">{percent(cost.missRate, 1)}</span> of them.
       </p>
 
       <DotGrid fraction={cost.missRate} color={color} />
@@ -48,9 +49,10 @@ function Side({ cost, name, color, qualifiedLabel }) {
 export default function HumanCost({ costs, groupNames, qualifiedLabel }) {
   if (!costs) {
     return (
-      <div className="flex h-full items-center justify-center text-[13px] text-muted">
-        Train the model to see who absorbs the errors.
-      </div>
+      <EmptyState>
+        One hundred squares per group, filled to the share of qualified people the model turns away.
+        The two grids will not match.
+      </EmptyState>
     )
   }
 

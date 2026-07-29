@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+
 export const steps = [
   {
     body: 'This model is about 82 percent accurate. That number is real. Watch what it hides.',
@@ -22,34 +24,63 @@ export const steps = [
 ]
 
 export default function Tour({ step, onStep, onClose }) {
-  if (step === null) return null
+  const cardRef = useRef(null)
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
+  const open = step !== null
+
+  useEffect(() => {
+    if (!open) return undefined
+    const opener = document.activeElement
+    cardRef.current?.focus()
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') closeRef.current()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      if (opener instanceof HTMLElement) opener.focus()
+    }
+  }, [open])
+
+  if (!open) return null
+
   const current = steps[step]
   const last = step === steps.length - 1
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center p-6">
-      <div className="pointer-events-auto w-full max-w-xl rounded-md border border-edge bg-panel p-6 shadow-2xl">
-        <div className="mb-3 flex items-center justify-between">
+    <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center px-6 pb-28">
+      <div
+        ref={cardRef}
+        role="dialog"
+        aria-label="Guided tour"
+        tabIndex={-1}
+        className="pointer-events-auto w-full max-w-xl rounded-md border border-edge bg-panel p-6 shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
+      >
+        <div className="mb-4 flex items-baseline justify-between gap-4">
           <span className="label">
-            Step {step + 1} of {steps.length}
+            Step <span className="num">{step + 1}</span> of{' '}
+            <span className="num">{steps.length}</span>
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="text-[12px] text-muted hover:text-ink"
+            className="rounded-[2px] text-[11px] text-muted transition-colors duration-150 hover:text-ink"
           >
             Dismiss
           </button>
         </div>
 
-        <p className="text-[15px] leading-relaxed">{current.body}</p>
+        <p aria-live="polite" className="leading-relaxed">
+          {current.body}
+        </p>
 
-        <div className="mt-5 flex items-center justify-between">
-          <div className="flex gap-[6px]">
+        <div className="mt-6 flex items-center justify-between gap-4">
+          <div className="flex gap-2" aria-hidden="true">
             {steps.map((_, i) => (
               <span
                 key={i}
-                className="h-[3px] w-6 rounded-full transition-colors duration-200"
+                className="h-[2px] w-6 rounded-full transition-colors duration-200"
                 style={{ background: i <= step ? 'var(--color-ink)' : 'var(--color-edge)' }}
               />
             ))}
@@ -60,7 +91,7 @@ export default function Tour({ step, onStep, onClose }) {
               <button
                 type="button"
                 onClick={() => onStep(step - 1)}
-                className="rounded-[4px] border border-edge px-3 py-[6px] text-[12px] text-muted hover:text-ink"
+                className="rounded-[4px] border border-edge px-4 py-2 text-muted transition-colors duration-150 hover:text-ink"
               >
                 Back
               </button>
@@ -68,7 +99,7 @@ export default function Tour({ step, onStep, onClose }) {
             <button
               type="button"
               onClick={() => (last ? onClose() : onStep(step + 1))}
-              className="rounded-[4px] border border-edge bg-edge px-4 py-[6px] text-[12px]"
+              className="rounded-[4px] border border-edge bg-edge px-4 py-2 transition-colors duration-150 hover:border-muted"
             >
               {last ? 'Done' : 'Next'}
             </button>

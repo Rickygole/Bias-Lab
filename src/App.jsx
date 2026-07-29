@@ -123,7 +123,7 @@ export default function App() {
         />
 
         <main className="flex min-h-0 flex-1 flex-col">
-          <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-4 lg:grid-cols-2">
+          <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-6 lg:grid-cols-2">
             <Panel title="Score distributions" note="drag the line">
               <ScoreDistribution
                 scores={state.scores}
@@ -135,7 +135,7 @@ export default function App() {
               />
             </Panel>
 
-            <Panel title="Outcomes by group" note="test set">
+            <Panel title="Outcomes by group" note="test set" className="order-1 lg:order-none">
               <ConfusionMatrices matrices={derived?.matrices} groupNames={groupNames} />
             </Panel>
 
