@@ -217,7 +217,7 @@ export default function LeftRail({
       />
 
       <Card title="Decision" note="the only control">
-        <div className="hidden flex-col gap-4 pb-4 lg:flex">
+        <div className="hidden flex-col gap-4 pb-2 lg:flex">
           {splitMode ? (
             <>
               <ThresholdSlider

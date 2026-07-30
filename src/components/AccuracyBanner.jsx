@@ -58,7 +58,7 @@ export default function AccuracyBanner({ accuracy, largestGap, hollow, groupName
         className={hollow ? 'text-bad' : 'text-ink'}
       />
       {hollow ? (
-        <p className="max-w-[62ch] pb-1 leading-[21px] text-ink">
+        <p className="max-w-[96ch] pb-1 leading-[21px] text-ink">
           Every gap is small because almost nobody is approved:{' '}
           <span className="num">{percent(hollow[0], 1)}</span> of {groupNames[0]} and{' '}
           <span className="num">{percent(hollow[1], 1)}</span> of {groupNames[1]}. Equality bought by

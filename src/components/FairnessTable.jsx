@@ -52,7 +52,7 @@ function Row({ definition, family, variant, tail }) {
 
   return (
     <tr className={tail ? '' : 'border-b border-hair'}>
-      <td className="py-1.5 pr-6 align-baseline">
+      <td className="py-2.5 pr-6 align-baseline">
         <div className="grid items-baseline gap-x-6 sm:grid-cols-[minmax(0,264px)_minmax(0,1fr)]">
           <div className="leading-[19px]">
             {family ? <span className="font-medium text-ink">{family}</span> : null}
@@ -87,28 +87,30 @@ function Row({ definition, family, variant, tail }) {
           {uncertain ? <span className="n-xs text-dim">not certain</span> : null}
         </div>
       </td>
-      <td className="n-sm hidden w-[92px] py-1.5 pl-3 text-right align-baseline text-muted sm:table-cell">
+      <td className="n-sm hidden w-[92px] py-2.5 pl-3 text-right align-baseline text-muted sm:table-cell">
         <AnimatedNumber value={definition.values[0]} format={(v) => percent(v, 1)} blankWidth={14} />
       </td>
-      <td className="n-sm hidden w-[92px] py-1.5 pl-3 text-right align-baseline text-muted sm:table-cell">
+      <td className="n-sm hidden w-[92px] py-2.5 pl-3 text-right align-baseline text-muted sm:table-cell">
         <AnimatedNumber value={definition.values[1]} format={(v) => percent(v, 1)} blankWidth={14} />
       </td>
-      <td className="hidden w-[150px] py-1.5 pl-5 align-middle sm:table-cell">
+      <td className="hidden w-[150px] py-2.5 pl-5 align-middle sm:table-cell">
         {definition.live ? <GapBar values={definition.values} interval={interval} /> : null}
       </td>
-      <td className="w-[112px] py-1.5 pl-3 align-baseline whitespace-nowrap sm:w-[176px] sm:pl-4">
+      <td className="w-[112px] py-2.5 pl-3 align-baseline whitespace-nowrap sm:w-[176px] sm:pl-4">
         <span className="flex items-baseline justify-end gap-3">
           {interval ? (
             <span className="n-xs hidden text-dim sm:inline">
               {uncertain ? 'not certain' : `± ${points(interval.margin, 1)}`}
             </span>
           ) : null}
-          <AnimatedNumber
-            value={definition.gap}
-            format={(v) => percent(v, 1)}
-            blankWidth={22}
-            className={`n-md ${uncertain ? 'text-muted' : 'text-ink'}`}
-          />
+          <span className="w-[58px] text-right">
+            <AnimatedNumber
+              value={definition.gap}
+              format={(v) => percent(v, 1)}
+              blankWidth={22}
+              className={`n-md ${uncertain ? 'text-muted' : 'text-ink'}`}
+            />
+          </span>
         </span>
       </td>
     </tr>
@@ -202,7 +204,6 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
 
   const moving = rowsFor(definitions.filter((d) => d.live))
   const fixed = rowsFor(definitions.filter((d) => !d.live))
-  const hollow = hollowEquality(definitions, ready)
 
   return (
     <div className="flex flex-1 flex-col">
@@ -249,7 +250,7 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
         </tbody>
       </table>
 
-      <p className="mt-auto min-h-[21px] pt-3 leading-[21px]" aria-live="polite">
+      <p className="min-h-[21px] pt-4 leading-[21px]" aria-live="polite">
         {sentence}
       </p>
     </div>

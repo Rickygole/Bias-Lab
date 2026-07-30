@@ -49,7 +49,7 @@ function Block({ matrix, name, color, outcomes, first }) {
 
 export default function ConfusionMatrices({ matrices, groupNames, outcomes }) {
   return (
-    <table className="h-full w-full border-collapse">
+    <table className="w-full border-collapse">
       <caption className="sr-only">
         Counts of each outcome for both groups at the current threshold
       </caption>
