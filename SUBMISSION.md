@@ -65,7 +65,7 @@ actually produces, and fails if they diverge.
 React, Vite, Tailwind and Web Workers on the front end. A logistic regression implemented from
 scratch: sigmoid, binary cross entropy, full batch gradient descent, about sixty lines, no machine
 learning library. Python with numpy, pandas and scikit-learn offline, run through uv, for dataset
-generation and for the correctness checks. Vitest for 78 unit tests including a server side render
+generation and for the correctness checks. Vitest for 102 unit tests including a server side render
 smoke test. Deployed on GitHub Pages.
 
 Three things in the repository verify the work rather than assert it, and each runs in one command:
@@ -191,10 +191,13 @@ accuracy number hold still while the human numbers move.
 Captured and committed under `docs/screenshots`. Upload in this order, because the first is what
 appears in the Devpost gallery listing.
 
-1. `01-loan-overview.png` is the whole instrument on the loan dataset at threshold 0.45.
-2. `02-medical.png` is the medical dataset. The synthetic data marker sits in frame on the left,
+1. `01-loan-overview.png` is the whole instrument on the loan dataset at threshold 0.45. Lead with
+   this one, because the Devpost gallery shows the first image in listings and this is the product.
+2. `00-picker.png` is the entry screen, where the three datasets and their broken labels are
+   explained. Second, because it is what a visitor actually sees first.
+3. `02-medical.png` is the medical dataset. The synthetic data marker sits in frame on the left,
    which is deliberate and should not be cropped out.
-3. `03-admissions.png` is the admissions dataset, showing proxy discrimination.
-4. `04-separate.png` is separate thresholds per group.
-5. `05-tour.png` is the guided tour docked at the bottom, reading the live accuracy.
-6. `06-mobile.png` is the phone layout.
+4. `03-admissions.png` is the admissions dataset, showing proxy discrimination.
+5. `04-separate.png` is separate thresholds per group.
+6. `05-tour.png` is the guided tour docked at the bottom, reading the live accuracy.
+7. `06-mobile.png` is the narrow layout.

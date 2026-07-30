@@ -96,6 +96,9 @@ straight to the state being discussed and a student can send back what they foun
 group. `tour=1` opens the guided tour. Values outside 0 to 1 are clamped and anything unparseable is
 ignored, so a mangled link degrades to the default rather than breaking.
 
+Any query parameter at all skips the dataset picker and lands directly on the instrument, so a link
+you share drops someone into the state you meant rather than making them choose again.
+
 ## The three datasets
 
 Every dataset ships with a card explaining where it came from, what each feature means, and what is
