@@ -1,29 +1,20 @@
 import AnimatedNumber from './AnimatedNumber.jsx'
-import Blank from './Blank.jsx'
-import { count, percent } from '../lib/format.js'
+import { count } from '../lib/format.js'
 
-function Cell({ value, share, harm }) {
+function Cell({ value, harm }) {
   return (
-    <td className="py-2 pl-4 align-baseline">
-      <div className="flex items-baseline justify-end gap-2">
-        <AnimatedNumber
-          value={value}
-          format={count}
-          className={`n-md ${harm ? 'text-ink' : 'text-muted'}`}
-          blankWidth={16}
-        />
-        <span className="n-xs w-7 shrink-0 text-right text-dim">
-          {share === null || share === undefined ? <Blank width={12} /> : percent(share, 0)}
-        </span>
-      </div>
+    <td className="py-2 pl-4 text-right align-baseline">
+      <AnimatedNumber
+        value={value}
+        format={count}
+        className={`n-md ${harm ? 'text-ink' : 'text-muted'}`}
+        blankWidth={16}
+      />
     </td>
   )
 }
 
 function Block({ matrix, name, color, outcomes, first }) {
-  const n = matrix?.n ?? 0
-  const share = (key) => (matrix && n > 0 ? matrix[key] / n : null)
-
   return (
     <tbody>
       <tr>
@@ -42,15 +33,15 @@ function Block({ matrix, name, color, outcomes, first }) {
         <th scope="row" className="note py-2 pr-2 text-left font-normal whitespace-nowrap text-muted">
           {outcomes.actual[0]}
         </th>
-        <Cell value={matrix?.tp ?? null} share={share('tp')} />
-        <Cell value={matrix?.fn ?? null} share={share('fn')} harm />
+        <Cell value={matrix?.tp ?? null} />
+        <Cell value={matrix?.fn ?? null} harm />
       </tr>
       <tr className="border-t border-hair">
         <th scope="row" className="note py-2 pr-2 text-left font-normal whitespace-nowrap text-muted">
           {outcomes.actual[1]}
         </th>
-        <Cell value={matrix?.fp ?? null} share={share('fp')} harm />
-        <Cell value={matrix?.tn ?? null} share={share('tn')} />
+        <Cell value={matrix?.fp ?? null} harm />
+        <Cell value={matrix?.tn ?? null} />
       </tr>
     </tbody>
   )
