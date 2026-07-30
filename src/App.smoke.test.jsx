@@ -28,7 +28,7 @@ describe('App on a bare url', () => {
 
   it('opens on the picker rather than the instrument', () => {
     const html = renderToString(<App />)
-    expect(html).toContain('Choose a dataset')
+    expect(html).toContain('Load and train')
     expect(html).toContain('What is wrong with the label')
     for (const heading of PANELS) {
       expect(html).not.toContain(heading)
@@ -67,7 +67,7 @@ describe('App under url parameters', () => {
     for (const search of ['?dataset=medical&t=0.65', '?tour=1', '?utm_source=slides']) {
       stubBrowser(search)
       const html = renderToString(<App />)
-      expect(html).not.toContain('Choose a dataset')
+      expect(html).not.toContain('What is wrong with the label')
       expect(html).toContain('Score distributions')
     }
   })
@@ -104,6 +104,6 @@ describe('App under url parameters', () => {
     stubBrowser('?dataset=../etc/passwd&t=NaN&a=&b=999&split=1&tour=yes')
     const html = renderToString(<App />)
     expect(html).toContain('Bias Lab')
-    expect(html).not.toContain('Choose a dataset')
+    expect(html).not.toContain('What is wrong with the label')
   })
 })

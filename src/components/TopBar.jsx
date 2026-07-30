@@ -1,12 +1,14 @@
 import { datasetIds, datasetNames } from '../data/index.js'
 import Segmented from './Segmented.jsx'
+import Mark from './Mark.jsx'
 
 const options = datasetIds.map((id) => ({ value: id, label: datasetNames[id] }))
 
 export default function TopBar({ datasetId, onSelect, onReset, onTour }) {
   return (
     <header className="flex w-full min-w-0 shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-edge px-4 py-3 sm:px-6 lg:h-14 lg:flex-nowrap lg:py-0 lg:pr-5 lg:pl-5">
-      <div className="flex items-baseline gap-3">
+      <div className="flex items-center gap-2.5">
+        <Mark />
         <h1 className="tracking-[-0.01em] font-medium">Bias Lab</h1>
         <span className="note hidden text-dim sm:inline">one threshold, two outcomes</span>
       </div>

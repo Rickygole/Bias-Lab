@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { datasetIds, datasetNames } from '../data/index.js'
 import { picks } from '../data/cards.js'
+import Mark from './Mark.jsx'
 
 const groupColors = ['var(--color-groupA)', 'var(--color-groupB)']
 
@@ -8,28 +9,24 @@ function Detail({ id }) {
   const pick = picks[id]
 
   return (
-    <div className="plate mt-3 flex min-w-0 flex-col px-4 py-4 sm:px-5">
-      <p className="note text-dim">
-        <span className="text-muted">{pick.kind}.</span> {pick.origin}
+    <div className="mt-5">
+      <p className="read">
+        <span className="text-ink">{pick.kind}.</span> {pick.origin} {pick.decision}
       </p>
 
-      <p className="note mt-3 border-t border-hair pt-3 text-muted">{pick.decision}</p>
-
-      <div className="mt-3 border-t border-hair pt-3">
-        <span className="label block">Two groups, split by {pick.attribute.toLowerCase()}</span>
-        <div className="mt-1.5 flex flex-wrap gap-x-5 gap-y-1">
-          {pick.groups.map((group, i) => (
-            <span key={group} className="flex items-center gap-2">
-              <span className="swatch" style={{ background: groupColors[i] }} />
-              <span className="note text-muted">{group}</span>
-            </span>
-          ))}
-        </div>
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5">
+        <span className="label">{pick.attribute}</span>
+        {pick.groups.map((group, i) => (
+          <span key={group} className="flex items-center gap-2">
+            <span className="swatch" style={{ background: groupColors[i] }} />
+            <span className="note text-muted">{group}</span>
+          </span>
+        ))}
       </div>
 
-      <div className="mt-3 border-t border-hair pt-3">
+      <div className="mt-4 border-t border-hair pt-4">
         <span className="label block">What is wrong with the label</span>
-        <p className="read mt-1.5">{pick.label}</p>
+        <p className="read mt-2">{pick.label}</p>
       </div>
     </div>
   )
@@ -41,7 +38,8 @@ export default function DatasetPicker({ onChoose }) {
   return (
     <div className="flex min-h-dvh w-full max-w-full min-w-0 flex-col overflow-x-clip">
       <header className="flex w-full shrink-0 items-center border-b border-edge px-4 py-3 sm:px-6 lg:h-14 lg:px-5 lg:py-0">
-        <div className="flex items-baseline gap-3">
+        <div className="flex items-center gap-2.5">
+          <Mark />
           <h1 className="font-medium tracking-[-0.01em]">Bias Lab</h1>
           <span className="note hidden text-dim sm:inline">one threshold, two outcomes</span>
         </div>
@@ -61,11 +59,7 @@ export default function DatasetPicker({ onChoose }) {
             of fairness watching where you put it.
           </p>
 
-          <div className="mt-6 border-b border-edge pb-2.5">
-            <h2 className="label">Choose a dataset</h2>
-          </div>
-
-          <div className="mt-3 flex flex-wrap items-center gap-3">
+          <div className="mt-7 flex flex-wrap items-center gap-3">
             <label htmlFor="dataset" className="sr-only">
               Dataset
             </label>
@@ -94,9 +88,8 @@ export default function DatasetPicker({ onChoose }) {
 
           <Detail id={selected} />
 
-          <p className="note mt-4 text-dim">
-            No backend and no accounts. The model is trained on this page, in your browser, and
-            nothing you do here is sent anywhere.
+          <p className="note mt-8 border-t border-hair pt-4 text-dim">
+            No backend, no accounts, no API. The model is trained on this page, in your browser.
           </p>
         </div>
       </main>
