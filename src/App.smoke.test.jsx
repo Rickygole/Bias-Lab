@@ -43,10 +43,17 @@ describe('App on a bare url', () => {
     expect(html).toContain('Medical risk')
   })
 
-  it('says what a threshold is and marks where to start', () => {
+  it('says what a threshold is and offers a way in', () => {
     const html = renderToString(<App />)
     expect(html).toContain('threshold')
-    expect(html).toContain('Start here')
+    expect(html).toContain('Load and train')
+  })
+
+  it('lists every dataset in the selector and explains the selected one', () => {
+    const html = renderToString(<App />)
+    expect(html).toContain('real data')
+    expect(html).toContain('synthetic')
+    expect(html).toContain('What is wrong with the label')
   })
 
   it('holds the tour back until the instrument is on screen', () => {
