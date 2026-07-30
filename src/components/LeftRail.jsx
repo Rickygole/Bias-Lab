@@ -77,15 +77,6 @@ function LossCurve({ history, epochs }) {
   )
 }
 
-function Readout({ value, format, label }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <AnimatedNumber value={value} format={format} className="n-md text-ink" blankWidth={26} />
-      <span className="label text-dim">{label}</span>
-    </div>
-  )
-}
-
 function DatasetCard({ datasetId, dataset }) {
   const [open, setOpen] = useState(false)
   const card = cards[datasetId]
@@ -121,10 +112,6 @@ function DatasetCard({ datasetId, dataset }) {
 
 function CompositionCard({ composition, groupNames, qualifiedLabel }) {
   const total = composition ? composition[0].n + composition[1].n : null
-  const spread =
-    composition && composition[0].baseRate !== null && composition[1].baseRate !== null
-      ? Math.abs(composition[0].baseRate - composition[1].baseRate)
-      : null
 
   return (
     <Card title="Test set" note={total === null ? null : `${count(total)} people`}>
@@ -166,17 +153,11 @@ function CompositionCard({ composition, groupNames, qualifiedLabel }) {
       </div>
 
       <p className="note mt-3 text-dim">Share of each group who {qualifiedLabel}.</p>
-
-      <p className="note mt-3.5 border-t border-hair pt-3 text-muted">
-        {spread === null
-          ? 'These are the base rates. Their difference drives everything below.'
-          : `Base rates differ by ${points(spread, 1)} points. When they do, no imperfect model can be calibrated and have equal error rates at once. That is the wall.`}
-      </p>
     </Card>
   )
 }
 
-function ModelCard({ status, epoch, epochs, history, accuracy, auc }) {
+function ModelCard({ status, epoch, epochs, history, auc }) {
   const last = history.at(-1)?.loss ?? null
 
   return (
@@ -187,7 +168,7 @@ function ModelCard({ status, epoch, epochs, history, accuracy, auc }) {
       <LossCurve history={history} epochs={epochs} />
 
       <div className="mt-2 flex items-baseline justify-between gap-3">
-        <span className="note text-dim">Loss, log epochs</span>
+        <span className="note text-dim">Loss</span>
         <span className="n-xs text-muted">
           {decimal(CHANCE, 3)}
           <span className="px-1 text-dim">to</span>
@@ -195,9 +176,14 @@ function ModelCard({ status, epoch, epochs, history, accuracy, auc }) {
         </span>
       </div>
 
-      <div className="mt-3.5 grid grid-cols-2 gap-3 border-t border-hair pt-3.5">
-        <Readout value={accuracy} format={(v) => percent(v, 1)} label="Test accuracy" />
-        <Readout value={auc} format={(v) => decimal(v, 3)} label="AUC" />
+      <div className="mt-2 flex items-baseline justify-between gap-3">
+        <span className="note text-dim">AUC</span>
+        <AnimatedNumber
+          value={auc}
+          format={(v) => decimal(v, 3)}
+          className="n-xs text-ink"
+          blankWidth={26}
+        />
       </div>
     </Card>
   )
@@ -258,12 +244,6 @@ export default function LeftRail({
               onChange={(v) => onThreshold(0, v)}
               color="var(--color-ink)"
               label="Threshold"
-              caption={
-                <>
-                  Everyone scoring above{' '}
-                  <span className="num text-muted">{decimal(thresholds[0], 2)}</span> is {positive}.
-                </>
-              }
             />
           )}
         </div>
@@ -276,28 +256,10 @@ export default function LeftRail({
             value={splitMode}
             onChange={onSplitMode}
           />
-          <p className="note mt-3 text-dim">
-            Setting a different bar for each group is illegal in some contexts and required for
-            fairness in others.
-          </p>
         </div>
       </Card>
 
-      <ModelCard
-        status={status}
-        epoch={epoch}
-        epochs={epochs}
-        history={history}
-        accuracy={accuracy}
-        auc={auc}
-      />
-
-      <div className="mt-auto hidden pt-2 lg:block">
-        <p className="note text-dim">Six definitions, one threshold. You cannot satisfy them all.</p>
-        <button type="button" onClick={onTour} className="link note mt-2.5 inline-block text-ink">
-          Walk through it in six steps
-        </button>
-      </div>
+      <ModelCard status={status} epoch={epoch} epochs={epochs} history={history} auc={auc} />
     </aside>
   )
 }
