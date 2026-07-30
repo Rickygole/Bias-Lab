@@ -64,13 +64,9 @@ export default function AccuracyBanner({ accuracy, largestGap, hollow, groupName
           <span className="num">{percent(hollow[1], 1)}</span> of {groupNames[1]}. Equality bought by
           turning almost everyone away is the cheapest kind there is.
         </p>
-      ) : (
+      ) : drift === null ? null : (
         <p className="note hidden max-w-[52ch] pb-1.5 text-muted sm:block">
-          {accuracy === null
-            ? 'Fitting the model on the training split.'
-            : drift === null
-              ? 'Move the threshold and watch these two numbers pull against each other.'
-              : `Since you started, accuracy has moved ${points(drift.accuracy, 1)} points and the largest gap has moved ${points(drift.gap, 1)}.${striking ? ' The gap has moved much further than accuracy.' : ''}`}
+          {`Since you started, accuracy has moved ${points(drift.accuracy, 1)} points and the largest gap has moved ${points(drift.gap, 1)}.${striking ? ' The gap has moved much further than accuracy.' : ''}`}
         </p>
       )}
     </div>

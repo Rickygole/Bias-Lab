@@ -5,11 +5,15 @@ import GroupTag from './GroupTag.jsx'
 const GRID = 100
 const W = 100
 const H = 100
-const FILL = 0.9
-const SCRIM = 0.72
-const EDGE_DIM = 0.42
+const GHOST = 0.4
 const GUIDES = [0.25, 0.5, 0.75]
 const TICKS = [0, 0.25, 0.5, 0.75, 1]
+
+const tint = (group, strength) =>
+  `color-mix(in srgb, var(--color-group${group}) ${strength}%, var(--color-panel))`
+
+const APPROVED = [tint('A', 42), tint('B', 30)]
+const REJECTED = [tint('A', 20), tint('B', 12)]
 
 function shareAtOrAbove(scores, groups, group) {
   const reach = new Array(GRID + 1).fill(0)
@@ -43,15 +47,6 @@ function area(pts) {
   return `M0 ${H} ${pts.map((p) => `L${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join(' ')} L${W} ${H} Z`
 }
 
-function band(outer, inner) {
-  const back = inner
-    .slice()
-    .reverse()
-    .map((p) => `L${p[0].toFixed(2)} ${p[1].toFixed(2)}`)
-    .join(' ')
-  return `${line(outer)} ${back} Z`
-}
-
 export default function ScoreDistribution({
   scores,
   groups,
@@ -72,11 +67,8 @@ export default function ScoreDistribution({
     return {
       a,
       b,
-      areaA: area(pa),
-      areaB: area(pb),
-      lineA: line(pa),
-      lineB: line(pb),
-      gap: band(pa, pb),
+      areas: [area(pa), area(pb)],
+      lines: [line(pa), line(pb)],
     }
   }, [scores, groups])
 
@@ -130,10 +122,6 @@ export default function ScoreDistribution({
       ]
     : [{ group: 0, value: cut[0], color: 'var(--color-ink)' }]
 
-  const lower = Math.min(cut[0], cut[1])
-  const upper = Math.max(cut[0], cut[1])
-  const middleClip = cut[1] < cut[0] ? 'url(#cut-gap)' : 'url(#cut-under-b)'
-
   return (
     <div className="flex flex-1 flex-col">
       <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-6">
@@ -170,76 +158,46 @@ export default function ScoreDistribution({
           {curves ? (
             <>
               <defs>
-                <clipPath id="cut-gap">
-                  <path d={curves.gap} />
-                </clipPath>
-                <clipPath id="cut-under-b">
-                  <path d={curves.areaB} />
-                </clipPath>
-                <clipPath id="cut-lit-a">
+                <clipPath id="cut-approved-0">
                   <rect x={cut[0] * W} y={0} width={W} height={H} />
                 </clipPath>
-                <clipPath id="cut-lit-b">
+                <clipPath id="cut-approved-1">
                   <rect x={cut[1] * W} y={0} width={W} height={H} />
                 </clipPath>
               </defs>
 
               <g className="rise-up" style={{ '--rise-origin': '100%' }}>
-                <path d={curves.areaA} fill="var(--color-groupA)" opacity={FILL} />
-                <path d={curves.areaB} fill="var(--color-groupB)" opacity={FILL} />
+                {[0, 1].map((group) => (
+                  <g key={group}>
+                    <path d={curves.areas[group]} fill={REJECTED[group]} />
+                    <path
+                      d={curves.areas[group]}
+                      fill={APPROVED[group]}
+                      clipPath={`url(#cut-approved-${group})`}
+                    />
+                  </g>
+                ))}
 
-                <rect
-                  x={0}
-                  y={0}
-                  width={lower * W}
-                  height={H}
-                  fill="var(--color-panel)"
-                  opacity={SCRIM}
-                />
-                {upper > lower ? (
-                  <rect
-                    x={lower * W}
-                    y={0}
-                    width={(upper - lower) * W}
-                    height={H}
-                    fill="var(--color-panel)"
-                    opacity={SCRIM}
-                    clipPath={middleClip}
-                  />
-                ) : null}
-
-                <g opacity={EDGE_DIM}>
-                  <path
-                    d={curves.lineA}
-                    fill="none"
-                    stroke="var(--color-groupA)"
-                    strokeWidth={1.5}
-                    vectorEffect="non-scaling-stroke"
-                  />
-                  <path
-                    d={curves.lineB}
-                    fill="none"
-                    stroke="var(--color-groupB)"
-                    strokeWidth={1.5}
-                    vectorEffect="non-scaling-stroke"
-                  />
-                </g>
-                <path
-                  d={curves.lineA}
-                  fill="none"
-                  stroke="var(--color-groupA)"
-                  strokeWidth={1.5}
-                  vectorEffect="non-scaling-stroke"
-                  clipPath="url(#cut-lit-a)"
-                />
-                <path
-                  d={curves.lineB}
-                  fill="none"
-                  stroke="var(--color-groupB)"
-                  strokeWidth={1.5}
-                  vectorEffect="non-scaling-stroke"
-                  clipPath="url(#cut-lit-b)"
-                />
+                {[0, 1].map((group) => (
+                  <g key={group}>
+                    <path
+                      d={curves.lines[group]}
+                      fill="none"
+                      stroke={`var(--color-group${group === 0 ? 'A' : 'B'})`}
+                      strokeWidth={1.5}
+                      opacity={GHOST}
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <path
+                      d={curves.lines[group]}
+                      fill="none"
+                      stroke={`var(--color-group${group === 0 ? 'A' : 'B'})`}
+                      strokeWidth={1.5}
+                      vectorEffect="non-scaling-stroke"
+                      clipPath={`url(#cut-approved-${group})`}
+                    />
+                  </g>
+                ))}
               </g>
             </>
           ) : null}
