@@ -15,7 +15,6 @@ import HumanCost from './components/HumanCost.jsx'
 import AccuracyBanner from './components/AccuracyBanner.jsx'
 import ThresholdBar from './components/ThresholdBar.jsx'
 import Tour from './components/Tour.jsx'
-import { percent, points } from './lib/format.js'
 
 const EPOCHS = 4000
 const LR = 1.5
@@ -129,19 +128,6 @@ export default function App() {
   const outcomes = outcomeLabels[state.datasetId]
   const trained = derived !== null
 
-  const groupAccuracy = derived
-    ? `${groupNames[0]} ${percent(derived.rates[0].accuracy, 1)} correct, ${groupNames[1]} ${percent(
-        derived.rates[1].accuracy,
-        1,
-      )} correct. The same model, making different mistakes.`
-    : 'Two groups, four outcomes each. The counts arrive when the model finishes.'
-
-  const costSpread =
-    derived && derived.costs[0].missRate !== null && derived.costs[1].missRate !== null
-      ? derived.costs[1].missRate - derived.costs[0].missRate
-      : null
-  const worse = costSpread === null ? 0 : costSpread >= 0 ? 1 : 0
-
   return (
     <div className="flex min-h-dvh w-full max-w-full min-w-0 flex-col overflow-x-clip lg:h-dvh">
       <TopBar
@@ -187,12 +173,7 @@ export default function App() {
               />
             </Panel>
 
-            <Panel
-              title="Outcomes by group"
-              note="test set counts"
-              footer={groupAccuracy}
-              className="order-3 lg:order-2 lg:col-span-4"
-            >
+            <Panel title="Outcomes by group" className="order-3 lg:order-2 lg:col-span-4">
               <ConfusionMatrices
                 matrices={derived?.matrices}
                 groupNames={groupNames}
@@ -200,11 +181,7 @@ export default function App() {
               />
             </Panel>
 
-            <Panel
-              title="Fairness definitions"
-              note="all six at once, on purpose"
-              className="order-1 lg:order-4 lg:col-span-12"
-            >
+            <Panel title="Fairness definitions" className="order-1 lg:order-4 lg:col-span-12">
               <FairnessTable
                 definitions={derived?.definitions ?? EMPTY}
                 groupNames={groupNames}
@@ -212,17 +189,7 @@ export default function App() {
               />
             </Panel>
 
-            <Panel
-              title="What this costs people"
-              footer={
-                costSpread === null
-                  ? 'Filled squares are people who qualified and were turned away anyway.'
-                  : Math.abs(costSpread) < 0.005
-                    ? 'Both groups are turned away at about the same rate right now.'
-                    : `${groupNames[worse]} are turned away ${points(Math.abs(costSpread), 1)} points more often than ${groupNames[1 - worse]}.`
-              }
-              className="order-2 lg:order-3 lg:col-span-3"
-            >
+            <Panel title="What this costs people" className="order-2 lg:order-3 lg:col-span-3">
               <HumanCost
                 costs={derived?.costs}
                 groupNames={groupNames}
