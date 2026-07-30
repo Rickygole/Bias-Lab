@@ -146,13 +146,11 @@ export default function App() {
           epoch={state.epoch}
           epochs={EPOCHS}
           history={state.history}
-          accuracy={derived?.accuracy ?? null}
           auc={auc}
           thresholds={state.thresholds}
           splitMode={state.splitMode}
           onThreshold={setThreshold}
           onSplitMode={(value) => dispatch({ type: 'setSplitMode', value })}
-          onTour={() => dispatch({ type: 'setTourStep', step: 0 })}
         />
 
         <main className="flex w-full min-w-0 flex-1 flex-col lg:min-h-0">

@@ -3,7 +3,7 @@ import { cards } from '../data/cards.js'
 import ThresholdSlider from './ThresholdSlider.jsx'
 import Segmented from './Segmented.jsx'
 import AnimatedNumber from './AnimatedNumber.jsx'
-import { count, decimal, percent, points } from '../lib/format.js'
+import { count, decimal, percent } from '../lib/format.js'
 
 const CHANCE = Math.LN2
 const CURVE_W = 100
@@ -49,7 +49,7 @@ function LossCurve({ history, epochs }) {
         x2={CURVE_W}
         y1={0.5}
         y2={0.5}
-        stroke="var(--color-hair)"
+        stroke="var(--color-edge)"
         strokeWidth={1}
         strokeDasharray="2 3"
         vectorEffect="non-scaling-stroke"
@@ -134,7 +134,7 @@ function CompositionCard({ composition, groupNames, qualifiedLabel }) {
                 />
               </div>
               <div className="mt-2 flex items-center gap-3">
-                <span className="h-[5px] flex-1 bg-hair">
+                <span className="h-[5px] flex-1 bg-edge">
                   <span
                     className="block h-[5px] transition-[width] duration-300 ease-out"
                     style={{ width: `${(rate ?? 0) * 100}%`, background: color }}
@@ -197,16 +197,13 @@ export default function LeftRail({
   epoch,
   epochs,
   history,
-  accuracy,
   auc,
   thresholds,
   splitMode,
   onThreshold,
   onSplitMode,
-  onTour,
 }) {
   const groupNames = dataset?.groupNames ?? ['Group A', 'Group B']
-  const positive = dataset?.positiveLabel?.toLowerCase() ?? 'approved'
   const qualifiedLabel = dataset?.qualifiedLabel ?? 'qualify'
 
   return (

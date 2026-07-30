@@ -98,7 +98,7 @@ export default function Tour({ step, accuracy, onStep, onClose }) {
         <button
           type="button"
           onClick={() => (last ? onClose() : onStep(step + 1))}
-          className="rounded-[3px] border border-edge bg-edge px-4 py-2 text-ink transition-colors duration-150 hover:border-dim"
+          className="rounded-[3px] border border-ink bg-ink px-4 py-2 text-bg transition-colors duration-150 hover:border-muted hover:bg-muted"
         >
           {last ? 'Done' : 'Next'}
         </button>

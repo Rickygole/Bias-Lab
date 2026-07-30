@@ -16,7 +16,7 @@ function UnitChart({ fraction, color }) {
         <span
           key={i}
           className="aspect-square rounded-[1px] transition-colors duration-150 ease-out"
-          style={{ background: i < filled ? color : 'var(--color-hair)' }}
+          style={{ background: i < filled ? color : 'var(--color-edge)' }}
         />
       ))}
     </div>
