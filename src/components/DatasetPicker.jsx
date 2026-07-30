@@ -37,6 +37,14 @@ export default function DatasetPicker({ onChoose }) {
 
   return (
     <div className="flex min-h-dvh w-full max-w-full min-w-0 flex-col overflow-x-clip">
+      <header className="flex w-full shrink-0 items-center border-b border-edge px-4 py-3 sm:px-6 lg:h-14 lg:px-5 lg:py-0">
+        <div className="flex items-center gap-2.5">
+          <Mark />
+          <h2 className="font-medium tracking-[-0.01em]">Bias Lab</h2>
+          <span className="note hidden text-dim sm:inline">one threshold, two outcomes</span>
+        </div>
+      </header>
+
       <main className="flex w-full min-w-0 flex-1 flex-col px-4 pt-6 pb-8 sm:px-6 lg:justify-center lg:px-5 lg:pt-7 lg:pb-10">
         <div className="mx-auto w-full max-w-[760px]">
           <div className="flex items-center gap-3.5">
