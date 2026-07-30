@@ -24,7 +24,7 @@ export const picks = {
     attribute: 'Sex',
     groups: ['Men', 'Women'],
     label:
-      'The label is income above a cutoff. That is not creditworthiness and it is not merit. It records what the 1994 labor market paid people, including a wage gap that was already there. Sex is deliberately withheld from the model, which learns the gap anyway through marital status and occupation.',
+      'The label is income above a cutoff, which is not creditworthiness and not merit. It records what the 1994 labor market paid people, wage gap included. Sex is withheld from the model, which learns the gap anyway through marital status and occupation.',
   },
 
   admissions: {
@@ -34,7 +34,7 @@ export const picks = {
     attribute: 'First generation status',
     groups: ['Continuing generation', 'First generation'],
     label:
-      'Two features describe the school rather than the student: how many AP courses it offers, and how many students share one counselor. AP availability also feeds the test score, so a resource gap arrives looking like an ability gap. The label comes from a committee score that leans on AP coursework, which is defensible on its face and also measures the resources of a school and then calls the result student quality.',
+      'Two features describe the school rather than the student: AP courses offered, and students per counselor. AP availability also feeds the test score, so a resource gap arrives looking like an ability gap. The label is a committee score leaning on AP coursework, which measures the resources of a school and calls the result student quality.',
   },
 
   medical: {
@@ -45,7 +45,7 @@ export const picks = {
     attribute: 'Race',
     groups: ['White patients', 'Black patients'],
     label:
-      'The label is a high risk flag defined by next year spending, and spending records who had access rather than who was sick. Illness is drawn from one distribution for both groups, so they are equally sick by construction, and the disadvantaged group still produces fewer visits and smaller bills. The label is already wrong when the model receives it, so every metric on the page measures agreement with a biased record and not with reality.',
+      'The label is a high risk flag defined by next year spending, and spending records who had access rather than who was sick. Both groups are equally sick by construction, and the disadvantaged group still produces fewer visits and smaller bills. The label is wrong before the model sees it, so every metric measures agreement with a biased record and not with reality.',
   },
 }
 
