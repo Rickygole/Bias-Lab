@@ -135,7 +135,7 @@ export default function ScoreDistribution({
         />
       </div>
 
-      <div ref={boxRef} className="relative min-h-[132px] flex-1 touch-none select-none">
+      <div ref={boxRef} className="relative min-h-[138px] flex-1 touch-none select-none">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
