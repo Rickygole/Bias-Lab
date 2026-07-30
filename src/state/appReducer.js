@@ -1,5 +1,6 @@
 export const initialState = {
   datasetId: 'loan',
+  entered: false,
   dataset: null,
   status: 'idle',
   epoch: 0,
@@ -26,6 +27,16 @@ export function appReducer(state, action) {
       return {
         ...initialState,
         datasetId: action.id,
+        entered: state.entered,
+        tourStep: state.tourStep,
+      }
+
+    case 'enterDataset':
+      if (action.id === state.datasetId) return { ...state, entered: true }
+      return {
+        ...initialState,
+        datasetId: action.id,
+        entered: true,
         tourStep: state.tourStep,
       }
 
@@ -62,7 +73,13 @@ export function appReducer(state, action) {
     }
 
     case 'reset':
-      return { ...initialState, datasetId: state.datasetId, dataset: state.dataset, status: 'ready' }
+      return {
+        ...initialState,
+        datasetId: state.datasetId,
+        entered: state.entered,
+        dataset: state.dataset,
+        status: 'ready',
+      }
 
     case 'setTourStep':
       return { ...state, tourStep: action.step }
