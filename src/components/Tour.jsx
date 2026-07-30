@@ -4,11 +4,7 @@ import { percent } from '../lib/format.js'
 export const steps = [
   {
     body: (accuracy) =>
-      `This model is ${accuracy === null ? 'about 84 percent' : percent(accuracy, 1)} accurate. That number is real. Watch what it hides.`,
-  },
-  {
-    body: () =>
-      'Drag the threshold. Watch the overall accuracy at the bottom. Now watch how many qualified people in each group get turned away.',
+      `This model is ${accuracy === null ? 'about 84 percent' : percent(accuracy, 1)} accurate, and that number is real. Drag the threshold and watch it barely move. Then watch how many qualified people in each group get turned away.`,
   },
   {
     body: () =>
