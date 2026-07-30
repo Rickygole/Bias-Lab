@@ -160,11 +160,18 @@ This matters more than the screenshots. The argument of this project is a trade 
 is a change over time, which a still image cannot show. Sixty seconds, screen recording, voice over
 if there is time and captions if there is not.
 
-**0:00 to 0:08.** Page loads and trains itself. "Bias Lab trains a real classifier in your browser,
-then asks you to move one slider."
+**0:00 to 0:10.** Open the link. The page trains itself in about a quarter of a second, so there is
+nothing to click and nothing to wait for. Point at the Model card in the left rail: 4,000 epochs, and
+a loss curve running from 0.693 down to 0.407. Say: "That 0.693 is not a round number, it is the
+natural log of 2, which is exactly the loss of a coin flip. The model starts at chance and learns
+from there, in your browser, by gradient descent I wrote by hand."
 
-**0:08 to 0:18.** Point at the left rail. "Logistic regression, written by hand, no machine learning
-library. It matches scikit-learn to seven decimal places."
+**0:10 to 0:18.** Click **Reset**. The model retrains and the loss curve redraws in front of the
+viewer. That is the training moment, and it is the only way to show it now that training is
+automatic. Say: "No machine learning library, and it matches scikit-learn to seven decimal places.
+There is one command in the repository that proves it."
+
+Switching datasets retrains too, if you would rather show it that way.
 
 **0:18 to 0:38.** The important twenty seconds. Drag the threshold slowly from 0.40 to 0.60. Keep the
 cursor near the accuracy number so the viewer watches it not move, then move to the human cost
