@@ -13,10 +13,26 @@ function stubBrowser(search = '') {
 beforeEach(() => stubBrowser())
 afterEach(() => vi.unstubAllGlobals())
 
-describe('App renders', () => {
+const PANELS = [
+  'Score distributions',
+  'Outcomes by group',
+  'Fairness definitions',
+  'What this costs people',
+]
+
+describe('App on a bare url', () => {
   it('produces markup without throwing', () => {
     const html = renderToString(<App />)
     expect(html.length).toBeGreaterThan(500)
+  })
+
+  it('opens on the picker rather than the instrument', () => {
+    const html = renderToString(<App />)
+    expect(html).toContain('Choose a dataset')
+    expect(html).toContain('What is wrong with the label')
+    for (const heading of PANELS) {
+      expect(html).not.toContain(heading)
+    }
   })
 
   it('shows the product name and every dataset choice', () => {
@@ -27,14 +43,32 @@ describe('App renders', () => {
     expect(html).toContain('Medical risk')
   })
 
-  it('shows all four panel headings before data arrives', () => {
+  it('says what a threshold is and marks where to start', () => {
     const html = renderToString(<App />)
-    for (const heading of [
-      'Score distributions',
-      'Outcomes by group',
-      'Fairness definitions',
-      'What this costs people',
-    ]) {
+    expect(html).toContain('threshold')
+    expect(html).toContain('Start here')
+  })
+
+  it('holds the tour back until the instrument is on screen', () => {
+    const html = renderToString(<App />)
+    expect(html).not.toContain('Guided tour')
+  })
+})
+
+describe('App under url parameters', () => {
+  it('skips the picker for any query at all', () => {
+    for (const search of ['?dataset=medical&t=0.65', '?tour=1', '?utm_source=slides']) {
+      stubBrowser(search)
+      const html = renderToString(<App />)
+      expect(html).not.toContain('Choose a dataset')
+      expect(html).toContain('Score distributions')
+    }
+  })
+
+  it('shows all four panel headings before data arrives', () => {
+    stubBrowser('?dataset=loan')
+    const html = renderToString(<App />)
+    for (const heading of PANELS) {
       expect(html).toContain(heading)
     }
   })
@@ -55,6 +89,7 @@ describe('App renders', () => {
   it('renders with the tour open', () => {
     stubBrowser('?tour=1')
     const html = renderToString(<App />)
+    expect(html).toContain('Guided tour')
     expect(html.length).toBeGreaterThan(500)
   })
 
@@ -62,5 +97,6 @@ describe('App renders', () => {
     stubBrowser('?dataset=../etc/passwd&t=NaN&a=&b=999&split=1&tour=yes')
     const html = renderToString(<App />)
     expect(html).toContain('Bias Lab')
+    expect(html).not.toContain('Choose a dataset')
   })
 })

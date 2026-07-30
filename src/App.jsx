@@ -4,7 +4,8 @@ import { loadDataset } from './data/index.js'
 import { outcomes as outcomeLabels } from './data/cards.js'
 import { fairness, humanCost, overallAccuracy, rocCurve } from './ml/metrics.js'
 import { runTraining } from './ml/runTraining.js'
-import { readUrlState, shouldOpenTour, writeUrlState } from './lib/urlState.js'
+import { readUrlState, shouldOpenTour, shouldShowPicker, writeUrlState } from './lib/urlState.js'
+import DatasetPicker from './components/DatasetPicker.jsx'
 import TopBar from './components/TopBar.jsx'
 import LeftRail from './components/LeftRail.jsx'
 import Panel from './components/Panel.jsx'
@@ -21,12 +22,14 @@ const LR = 1.5
 const EMPTY = fairness([], [], [], [0.5, 0.5]).definitions
 
 export default function App() {
-  const [state, dispatch] = useReducer(appReducer, undefined, () =>
-    makeInitialState({
-      ...readUrlState(window.location.search),
-      ...(shouldOpenTour(window.location.search, window.sessionStorage) ? { tourStep: 0 } : {}),
-    }),
-  )
+  const [state, dispatch] = useReducer(appReducer, undefined, () => {
+    const search = window.location.search
+    return makeInitialState({
+      ...readUrlState(search),
+      ...(shouldOpenTour(search, window.sessionStorage) ? { tourStep: 0 } : {}),
+      entered: !shouldShowPicker(search),
+    })
+  })
   const cancelRef = useRef(null)
 
   useEffect(() => {
@@ -70,13 +73,14 @@ export default function App() {
   useEffect(() => () => cancelRef.current?.(), [])
 
   useEffect(() => {
+    if (!state.entered) return
     const query = writeUrlState({
       datasetId: state.datasetId,
       thresholds: state.thresholds,
       splitMode: state.splitMode,
     })
     window.history.replaceState(null, '', `${window.location.pathname}${query}`)
-  }, [state.datasetId, state.thresholds, state.splitMode])
+  }, [state.entered, state.datasetId, state.thresholds, state.splitMode])
 
   const derived = useMemo(() => {
     if (!state.scores || !state.dataset) return null
@@ -128,6 +132,10 @@ export default function App() {
   const outcomes = outcomeLabels[state.datasetId]
   const trained = derived !== null
 
+  if (!state.entered) {
+    return <DatasetPicker onChoose={(id) => dispatch({ type: 'enterDataset', id })} />
+  }
+
   return (
     <div className="flex min-h-dvh w-full max-w-full min-w-0 flex-col overflow-x-clip lg:h-dvh">
       <TopBar
@@ -154,7 +162,7 @@ export default function App() {
         />
 
         <main className="flex w-full min-w-0 flex-1 flex-col lg:min-h-0">
-          <div className="scroller grid min-w-0 flex-1 auto-rows-min grid-cols-1 content-start gap-4 px-4 pt-3.5 pb-2.5 sm:px-6 lg:min-h-0 lg:grid-cols-12 lg:overflow-y-auto lg:px-5">
+          <div className="scroller grid min-w-0 flex-1 grid-cols-1 gap-4 px-4 pt-3.5 pb-2.5 sm:px-6 lg:min-h-0 lg:grid-cols-12 lg:overflow-y-auto lg:px-5">
             <Panel
               title="Score distributions"
               note="share of each group at or above the score"
