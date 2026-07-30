@@ -17,17 +17,17 @@
 }
 
 @theme {
-  --color-bg: #0b0d10;
-  --color-panel: #121519;
-  --color-edge: #252a33;
-  --color-hair: #1c2029;
-  --color-ink: #e9ecf1;
-  --color-muted: #98a0ac;
-  --color-dim: #7d8593;
-  --color-groupA: #4c93f0;
-  --color-groupB: #f0ae45;
-  --color-good: #45c98a;
-  --color-bad: #f26d6d;
+  --color-bg: #f6f6f3;
+  --color-panel: #ffffff;
+  --color-edge: #c9cac4;
+  --color-hair: #e7e7e2;
+  --color-ink: #16181c;
+  --color-muted: #4c5158;
+  --color-dim: #6a6f77;
+  --color-groupA: #10529e;
+  --color-groupB: #a35c00;
+  --color-good: #177245;
+  --color-bad: #a01c11;
 
   --font-sans:
     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
@@ -39,7 +39,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   html,
@@ -226,7 +226,7 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 input[type='range']:hover::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px var(--color-hair);
+  box-shadow: 0 0 0 3px var(--color-edge);
 }
 
 input[type='range']:focus-visible {
@@ -253,7 +253,7 @@ input[type='range']::-moz-range-thumb {
 }
 
 input[type='range']:hover::-moz-range-thumb {
-  box-shadow: 0 0 0 3px var(--color-hair);
+  box-shadow: 0 0 0 3px var(--color-edge);
 }
 
 input[type='range']:focus-visible::-moz-range-thumb {
