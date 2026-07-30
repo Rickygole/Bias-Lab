@@ -62,7 +62,7 @@ export default function AccuracyBanner({ accuracy, largestGap, hollow, groupName
           Every gap is small because almost nobody is approved:{' '}
           <span className="num">{percent(hollow[0], 1)}</span> of {groupNames[0]} and{' '}
           <span className="num">{percent(hollow[1], 1)}</span> of {groupNames[1]}. Equality bought by
-          turning almost everyone away is the cheapest kind there is.
+          turning almost everyone away is the cheapest kind there is. Try again while approving at least a quarter of each group.
         </p>
       ) : drift === null ? null : (
         <p className="note hidden max-w-[52ch] pb-1.5 text-muted sm:block">

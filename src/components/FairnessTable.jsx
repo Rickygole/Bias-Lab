@@ -29,7 +29,6 @@ function GapBar({ values, interval }) {
         style={{
           background: uncertain ? 'transparent' : color,
           boxShadow: uncertain ? `inset 0 0 0 1px ${color}` : 'none',
-          opacity: uncertain ? 0.7 : 1,
           width: `${magnitude * 50}%`,
           [side]: '50%',
         }}
@@ -249,16 +248,6 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
           ))}
         </tbody>
       </table>
-
-      {hollow ? (
-        <p className="mt-4 border-t border-hair pt-3 leading-[21px] text-ink">
-          Every gap is small here because almost nobody is approved:{' '}
-          <span className="num">{percent(hollow[0], 1)}</span> of {groupNames[0]} and{' '}
-          <span className="num">{percent(hollow[1], 1)}</span> of {groupNames[1]}. Equality bought by
-          turning almost everyone away is the cheapest kind there is. Try it again while approving at
-          least a quarter of each group.
-        </p>
-      ) : null}
 
       <p className="mt-auto min-h-[21px] pt-3 leading-[21px]" aria-live="polite">
         {sentence}
