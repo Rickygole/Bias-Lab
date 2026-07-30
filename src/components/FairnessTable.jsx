@@ -97,21 +97,20 @@ function Row({ definition, family, variant, tail }) {
       <td className="hidden w-[150px] py-1.5 pl-5 align-middle sm:table-cell">
         {definition.live ? <GapBar values={definition.values} interval={interval} /> : null}
       </td>
-      <td className="hidden w-[124px] py-1.5 pl-4 text-right align-baseline whitespace-nowrap sm:table-cell">
-        {interval ? (
-          <span className="n-xs text-dim">
-            {`± ${points(interval.margin, 1)}`}
-            {uncertain ? <span className="pl-2 text-muted">not certain</span> : null}
-          </span>
-        ) : null}
-      </td>
-      <td className="w-[86px] py-1.5 pl-3 text-right align-baseline sm:w-[100px] sm:pl-4">
-        <AnimatedNumber
-          value={definition.gap}
-          format={(v) => percent(v, 1)}
-          blankWidth={22}
-          className={`n-md ${uncertain ? 'text-muted' : 'text-ink'}`}
-        />
+      <td className="w-[112px] py-1.5 pl-3 align-baseline whitespace-nowrap sm:w-[176px] sm:pl-4">
+        <span className="flex items-baseline justify-end gap-3">
+          {interval ? (
+            <span className="n-xs hidden text-dim sm:inline">
+              {uncertain ? 'not certain' : `± ${points(interval.margin, 1)}`}
+            </span>
+          ) : null}
+          <AnimatedNumber
+            value={definition.gap}
+            format={(v) => percent(v, 1)}
+            blankWidth={22}
+            className={`n-md ${uncertain ? 'text-muted' : 'text-ink'}`}
+          />
+        </span>
       </td>
     </tr>
   )
@@ -217,10 +216,9 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
             <th className="label hidden w-[150px] pb-2 pl-5 text-left font-medium sm:table-cell">
               <span className="sr-only">Gap direction</span>
             </th>
-            <th className="label hidden w-[124px] pb-2 pl-4 text-right font-medium sm:table-cell">
-              95% interval
+            <th className="label w-[112px] pb-2 pl-3 text-right font-medium text-ink sm:w-[176px] sm:pl-4">
+              Gap
             </th>
-            <th className="label w-[86px] pb-2 pl-3 text-right font-medium text-ink sm:w-[100px] sm:pl-4">Gap</th>
           </tr>
         </thead>
         <tbody>
@@ -236,15 +234,8 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
         </tbody>
         <tbody>
           <tr>
-            <td colSpan={6} className="border-t border-edge pt-3 pb-1.5">
-              <div className="grid items-baseline gap-x-6 gap-y-1 sm:grid-cols-[minmax(0,264px)_minmax(0,1fr)]">
-                <div className="label whitespace-nowrap text-dim">Does not move with the threshold</div>
-                <div className="note text-dim">
-                  The group columns are each group's own calibration error. The gap is the average
-                  difference between groups in what a score turns out to mean, not the difference of
-                  those two numbers.
-                </div>
-              </div>
+            <td colSpan={5} className="border-t border-edge pt-3 pb-1.5">
+              <div className="label whitespace-nowrap text-dim">Does not move with the threshold</div>
             </td>
           </tr>
           {fixed.map(({ d, family, variant }, i) => (
@@ -269,15 +260,9 @@ export default function FairnessTable({ definitions, groupNames, ready }) {
         </p>
       ) : null}
 
-      <div className="mt-auto flex flex-col gap-2 pt-3 lg:flex-row lg:items-baseline lg:justify-between lg:gap-10">
-        <p className="min-h-[42px] leading-[21px]">
-          {sentence ?? 'Move the threshold and watch which gaps trade against each other.'}
-        </p>
-        <p className="note max-w-[80ch] shrink-0 text-dim">
-          Bar direction shows which group is ahead. A gap marked not certain is one this test set is
-          too small to measure, not one that is absent.
-        </p>
-      </div>
+      <p className="mt-auto min-h-[21px] pt-3 leading-[21px]" aria-live="polite">
+        {sentence}
+      </p>
     </div>
   )
 }
