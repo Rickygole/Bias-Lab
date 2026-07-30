@@ -31,6 +31,10 @@ export function readUrlState(search) {
   return state
 }
 
+export function shouldShowPicker(search) {
+  return new URLSearchParams(search).toString() === ''
+}
+
 const SEEN = 'bias-lab-tour-seen'
 
 export function shouldOpenTour(search, storage) {

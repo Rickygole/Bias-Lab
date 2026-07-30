@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { readUrlState, shouldOpenTour, writeUrlState } from './urlState.js'
+import { readUrlState, shouldOpenTour, shouldShowPicker, writeUrlState } from './urlState.js'
 
 describe('readUrlState', () => {
   it('is empty for no query', () => {
@@ -71,6 +71,31 @@ describe('writeUrlState', () => {
       thresholds: [0.6, 0.35],
       splitMode: true,
     })
+  })
+})
+
+describe('shouldShowPicker', () => {
+  it('shows on a bare url', () => {
+    expect(shouldShowPicker('')).toBe(true)
+    expect(shouldShowPicker('?')).toBe(true)
+  })
+
+  it('never intercepts a shared link', () => {
+    expect(shouldShowPicker('?dataset=medical&t=0.65')).toBe(false)
+    expect(shouldShowPicker('?dataset=medical&split=1&a=0.72&b=0.67')).toBe(false)
+    expect(shouldShowPicker('?t=0.45')).toBe(false)
+    expect(shouldShowPicker('?tour=1')).toBe(false)
+  })
+
+  it('steps aside for a parameter it does not know', () => {
+    expect(shouldShowPicker('?utm_source=slides')).toBe(false)
+    expect(shouldShowPicker('?dataset=nonsense')).toBe(false)
+  })
+
+  it('agrees with the tour on what a clean visit is', () => {
+    for (const search of ['', '?dataset=loan&t=0.45', '?tour=1']) {
+      expect(shouldShowPicker(search)).toBe(shouldOpenTour(search, undefined))
+    }
   })
 })
 
